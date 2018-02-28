@@ -1,0 +1,158 @@
+<?php
+
+namespace achertovsky\bluesnap\models;
+
+use yii\helpers\ArrayHelper;
+use yii\behaviors\TimestampBehavior;
+use achertovsky\bluesnap\helpers\Xml;
+use achertovsky\bluesnap\helpers\Request;
+
+/**
+ * @author alexander
+ * 
+ * Contains all logic related to bluesnap extended api related to product
+ * @property integer $id
+ * @property integer $created_at
+ * @property integer $updated_at
+ * @property integer $product_id
+ * @property string $product_status
+ * @property string $product_name
+ * @property string $product_short_description
+ * @property string $product_long_description
+ * @property string $product_info_url
+ * @property string $product_image
+ * @property string $product_merchant_descriptor
+ * @property string $product_support_email
+ */
+class Product extends Core
+{
+    /** @inheritdoc */
+    public static function tableName()
+    {
+        return 'bluesnap_product';
+    }
+    /**
+     * List of possible product status codes
+     */
+    const PRODUCT_STATUS_ACTIVE = 'A';
+    const PRODUCT_STATUS_INACTIVE = 'I';
+    const PRODUCT_STATUS_DELETED = 'D';
+    
+    /**
+     * List of urls for api requests
+     * @var string
+     */
+    protected $url = '';
+    protected $sandboxUrl = 'https://sandbox.bluesnap.com/services/2/catalog/products';
+    protected $liveUrl = 'https://ws.bluesnap.com/services/2/catalog/products';
+    
+    /** @inheritdoc */
+    public function setUrl()
+    {
+        if ($this->module->sandbox) {
+            $this->url = $this->sandboxUrl;
+        } else {
+            $this->url = $this->liveUrl;
+        }
+    }
+    
+    
+    /** @inheritdoc */
+    public function behaviors()
+    {
+        return ArrayHelper::merge(
+            parent::behaviors(),
+            [
+                [
+                    'class' => TimestampBehavior::className(),
+                ],
+            ]
+        );
+    }
+    
+    /** @inheritdoc */
+    public function scenarios()
+    {
+        return ArrayHelper::merge(
+            parent::scenarios(),
+            [
+                'create' => [
+                    'product_short_description', 'product_name'
+                ]
+            ]
+        );
+    }
+    
+    /** @inheritdoc */
+    public function rules()
+    {
+        return ArrayHelper::merge(
+            parent::rules(),
+            [
+                [['product_id'], 'integer'],
+                [['product_id', 'product_name', 'product_short_description'], 'required'],
+                [['product_image'], 'url'],
+                [['product_support_email'], 'email'],
+                [
+                    [
+                        'product_name', 'product_short_description', 'product_info_url', 'product_image',
+                        'product_long_description', 'product_merchant_descriptor', 'product_support_email',
+                    ],
+                    'string'
+                ],
+                [['product_status'], 'string', 'max' => 1, 'min' => 1,],
+            ]
+        );
+    }
+    
+    /**
+     * @param string $productName
+     * @param string $productDesc
+     */
+    public function defineMinimalRequirements($productName, $productDesc)
+    {
+        $this->product_name = $productName;
+        $this->product_short_description = $productDesc;
+    }
+    
+    /**
+     * Creates product on bluesnap and saves it to database
+     * @param string $presetStatus
+     * @return boolean|\achertovsky\bluesnap\models\Product
+     */
+    public function createProduct($presetStatus = Product::PRODUCT_STATUS_ACTIVE)
+    {
+        $this->product_status = $presetStatus;
+        //prevalidate
+        $this->setScenario('create');
+        if (!$this->validate()) {
+            return false;
+        }
+        $body = Xml::prepareBody('product', $this->getAttributes());
+        $this->setScenario('default');
+        $response = Request::post(
+            $this->url,
+            $body,
+            [
+                'Content-Type' => 'application/xml',
+                'Authorization' => $this->module->authToken,
+            ]
+        );
+        $code = $response->getStatusCode();
+        //201 means that product is created
+        if ($code == 201) {
+            //get productId from response
+            $productId = null;
+            $headers = $response->getHeaders();
+            if (isset($headers['location'])) {
+                $location = $headers['location'];
+                $this->product_id = substr($location, strrpos($location, '/')+1);
+            }
+            if ($this->save()) {
+                return $this;
+            }
+        }
+        
+        return false;
+    }
+}
