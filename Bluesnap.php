@@ -32,7 +32,7 @@ class Bluesnap extends \yii\base\Object
      * Creates new or returns list by filter
      * @param array $where
      * @param string $indexBy
-     * @return Product
+     * @return array of Product
      */
     public function getProductModel($where = [], $indexBy = 'product_id')
     {
