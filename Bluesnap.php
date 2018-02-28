@@ -31,9 +31,10 @@ class Bluesnap extends \yii\base\Object
     /**
      * Creates new or returns list by filter
      * @param array $where
+     * @param string $indexBy
      * @return Product
      */
-    public function getProductModel($where = [])
+    public function getProductModel($where = [], $indexBy = 'product_id')
     {
         if (empty($where)) {
             $model = new Product();
@@ -41,7 +42,7 @@ class Bluesnap extends \yii\base\Object
             $model->setUrl();
             return $model;
         }
-        $models = Product::find()->where($where)->all();
+        $models = Product::find()->where($where)->indexBy($indexBy)->all();
         foreach ($models as $key => $model) {
             $model->module = Yii::$app->getModule($this->moduleName);
             $model->setUrl();

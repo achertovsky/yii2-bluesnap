@@ -89,6 +89,7 @@ class Product extends Core
         return ArrayHelper::merge(
             parent::rules(),
             [
+                [['product_id'], 'unique'],
                 [['product_id'], 'integer'],
                 [['product_id', 'product_name', 'product_short_description'], 'required'],
                 [['product_image'], 'url'],
@@ -117,6 +118,7 @@ class Product extends Core
     
     /**
      * Creates product on bluesnap and saves it to database
+     * Docs: https://developers.bluesnap.com/v8976-Extended/docs/create-product
      * @param string $presetStatus
      * @return boolean|\achertovsky\bluesnap\models\Product
      */
@@ -154,5 +156,71 @@ class Product extends Core
         }
         
         return false;
+    }
+    
+    /**
+     * Sends update and saves it to database
+     * Docs: https://developers.bluesnap.com/v8976-Extended/docs/update-product
+     * @return boolean|\achertovsky\bluesnap\models\Product
+     */
+    public function updateProduct()
+    {
+        if (!$this->validate()) {
+            return false;
+        }
+        $body = Xml::prepareBody('product', $this->getAttributes());
+        $response = Request::put(
+            $this->url,
+            $body,
+            [
+                'Content-Type' => 'application/xml',
+                'Authorization' => $this->module->authToken,
+            ]
+        );
+        $code = $response->getStatusCode();
+        //docs says 204 - success
+        if ($code == 204) {
+           if ($this->save()) {
+            return $this;
+        } 
+        }
+        return false;
+    }
+    
+    /**
+     * Sends delete and saves it to database
+     * Docs: https://developers.bluesnap.com/v8976-Extended/docs/update-product
+     * @return boolean|\achertovsky\bluesnap\models\Product
+     */
+    public function deleteProduct()
+    {
+        $this->product_status = Product::PRODUCT_STATUS_DELETED;
+        return $this->updateProduct();
+    }
+    
+    /**
+     * Receives data from api, able to save
+     * @param string $productId
+     * @param bool $saveToDb
+     * @return boolean|\achertovsky\bluesnap\models\Product
+     */
+    public function getProduct($productId, $saveToDb = false)
+    {
+        $this->product_id = $productId;
+        $content = Request::get(
+            $this->url.'/'.$productId,
+            [
+                'Content-Type' => 'application/xml',
+                'Authorization' => $this->module->authToken,
+            ]
+        )->getContent();
+        $response = Xml::parse($content);
+        $this->setAttributes($response['product']);
+        if ($saveToDb) {
+            if (!$this->validate() || !$this->save()) {
+                return false;
+            }
+        }
+        return $this;
     }
 }
