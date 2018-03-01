@@ -170,7 +170,7 @@ class Product extends Core
         }
         $body = Xml::prepareBody('product', $this->getAttributes());
         $response = Request::put(
-            $this->url,
+            $this->url.'/'.$this->product_id,
             $body,
             [
                 'Content-Type' => 'application/xml',
