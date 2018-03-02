@@ -25,6 +25,37 @@ use Yii;
 class Sku extends \yii\db\ActiveRecord
 {
     /**
+     * List of possible sku status codes
+     */
+    const SKU_STATUS_ACTIVE = 'A';
+    const SKU_STATUS_INACTIVE = 'I';
+    const SKU_STATUS_DELETED = 'D';
+    
+    /**
+     * List of possible sku types
+     */
+    const SKU_TYPE_PHISICAL = 'PHYSICAL';
+    const SKU_TYPE_DIGITAL = 'DIGITAL';
+    
+    /**
+     * List of urls for api requests
+     * @var string
+     */
+    protected $url = '';
+    protected $sandboxUrl = 'https://sandbox.bluesnap.com/services/2/catalog/skus';
+    protected $liveUrl = 'https://ws.bluesnap.com/services/2/catalog/skus';
+    
+    /** @inheritdoc */
+    public function setUrl()
+    {
+        if ($this->module->sandbox) {
+            $this->url = $this->sandboxUrl;
+        } else {
+            $this->url = $this->liveUrl;
+        }
+    }
+    
+    /**
      * @inheritdoc
      */
     public static function tableName()
@@ -68,4 +99,22 @@ class Sku extends \yii\db\ActiveRecord
             'sku_custom_parameters' => 'Sku Custom Parameters',
         ];
     }
+    
+    /**
+     * @param string $productId
+     * @param string $skuType
+     * @param string $pricingSettings
+     */
+    public function defineMinimalRequirements($productId, $skuType, $pricingSettings)
+    {
+        $this->product_id = $productId;
+        $this->sku_type = $skuType;
+        $this->pricing_settings = $pricingSettings;
+    }
+    
+    public function updateSku()
+    {
+        
+    }
+
 }

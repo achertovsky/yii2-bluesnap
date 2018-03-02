@@ -5,6 +5,7 @@ namespace achertovsky\bluesnap;
 use yii\base\InvalidConfigException;
 use achertovsky\bluesnap\models\Product;
 use Yii;
+use achertovsky\bluesnap\models\Sku;
 
 /**
  * Component contains all required actions
@@ -29,20 +30,43 @@ class Bluesnap extends \yii\base\Object
     }
     
     /**
-     * Creates new or returns list by filter
+     * Alias for getCommon
      * @param array $where
      * @param string $indexBy
      * @return array of Product
      */
     public function getProductModel($where = [], $indexBy = 'product_id')
     {
+        return $this->getCommon(Product::className(), $where, $indexBy);
+    }
+    
+    /**
+     * Alias for getCommon
+     * @param array $where
+     * @param string $indexBy
+     * @return array of Sku
+     */
+    public function getSkuModel($where = [], $indexBy = 'product_id')
+    {
+        return $this->getCommon(Sku::className(), $where, $indexBy);
+    }
+    
+    /**
+     * Creates new or returns list by filter
+     * @param string $className
+     * @param array $where
+     * @param string $indexBy
+     * @return array of $className
+     */
+    public function getCommon($className, $where = [], $indexBy = 'product_id')
+    {
         if (empty($where)) {
-            $model = new Product();
+            $model = new $className();
             $model->module = Yii::$app->getModule($this->moduleName);
             $model->setUrl();
             return $model;
         }
-        $models = Product::find()->where($where)->indexBy($indexBy)->all();
+        $models = $className::find()->where($where)->indexBy($indexBy)->all();
         foreach ($models as $key => $model) {
             $model->module = Yii::$app->getModule($this->moduleName);
             $model->setUrl();
