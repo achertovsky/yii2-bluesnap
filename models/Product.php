@@ -90,7 +90,7 @@ class Product extends Core
             parent::rules(),
             [
                 [['product_id'], 'unique'],
-                [['product_id'], 'integer'],
+                [['created_at', 'updated_at', 'product_id'], 'integer'],
                 [['product_id', 'product_name', 'product_short_description'], 'required'],
                 [['product_image'], 'url'],
                 [['product_support_email'], 'email'],
