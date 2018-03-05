@@ -6,6 +6,7 @@ use yii\helpers\ArrayHelper;
 use yii\behaviors\TimestampBehavior;
 use achertovsky\bluesnap\helpers\Xml;
 use achertovsky\bluesnap\helpers\Request;
+use achertovsky\bluesnap\models\Sku;
 
 /**
  * @author alexander
@@ -102,6 +103,7 @@ class Product extends Core
                     'string'
                 ],
                 [['product_status'], 'string', 'max' => 1, 'min' => 1,],
+                ['product_skus', 'safe'],
             ]
         );
     }
@@ -144,7 +146,6 @@ class Product extends Core
         //201 means that product is created
         if ($code == 201) {
             //get productId from response
-            $productId = null;
             $headers = $response->getHeaders();
             if (isset($headers['location'])) {
                 $location = $headers['location'];
@@ -222,5 +223,41 @@ class Product extends Core
             }
         }
         return $this;
+    }
+    
+    /**
+     * @var array
+     */
+    public $product_skus;
+    
+    /** @inheritdoc */
+    public function attributes() {
+        return ArrayHelper::merge(
+            parent::attributes(),
+            [
+                'product_sku',
+            ]
+        );
+    }
+    
+    /**
+     * Getting sku if its insert
+     * @inheritdoc
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+        if ($insert) {
+            $product = $this->getProduct($this->product_id);
+            $sku = new Sku(
+                [
+                    'module' => $this->module,
+                ]
+            );
+            $sku->setUrl();
+            $location = $product->product_skus['url'];
+            $sku->sku_id = substr($location, strrpos($location, '/')+1);
+            $sku->getSku();
+        }
     }
 }

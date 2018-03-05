@@ -3,6 +3,8 @@
 namespace achertovsky\bluesnap\models;
 
 use Yii;
+use achertovsky\bluesnap\models\Core;
+use achertovsky\bluesnap\helpers\Request;
 
 /**
  * This is the model class for table "bluesnap_sku".
@@ -21,8 +23,9 @@ use Yii;
  * @property string $sku_effective_dates
  * @property string $sku_coupon_settings
  * @property string $sku_custom_parameters
+ * @property integer $sku_id
  */
-class Sku extends \yii\db\ActiveRecord
+class Sku extends Core
 {
     /**
      * List of possible sku status codes
@@ -69,8 +72,8 @@ class Sku extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['product_id', 'sku_type', 'pricing_settings'], 'required'],
-            [['created_at', 'updated_at', 'contract_name', 'product_id', 'collect_shipping_address'], 'integer'],
+            [['product_id', 'sku_type', 'pricing_settings', 'sku_id'], 'required'],
+            [['created_at', 'updated_at', 'contract_name', 'product_id', 'collect_shipping_address', 'sku_id'], 'integer'],
             [['pricing_settings', 'sku_image', 'sku_quantity_policy', 'sku_effective_dates', 'sku_coupon_settings', 'sku_custom_parameters'], 'string'],
             [['sku_status'], 'string', 'max' => 1],
             [['sku_type'], 'string', 'max' => 255],
@@ -100,21 +103,17 @@ class Sku extends \yii\db\ActiveRecord
         ];
     }
     
-    /**
-     * @param string $productId
-     * @param string $skuType
-     * @param string $pricingSettings
-     */
-    public function defineMinimalRequirements($productId, $skuType, $pricingSettings)
+    public function getSku()
     {
-        $this->product_id = $productId;
-        $this->sku_type = $skuType;
-        $this->pricing_settings = $pricingSettings;
+        $content = Request::get(
+            $this->url.'/'.$this->sku_id,
+            [
+                'Content-Type' => 'application/xml',
+                'Authorization' => $this->module->authToken,
+            ]
+        )->getContent();
+        $response = Xml::parse($content);
+        $this->setAttributes($response['catalog-sku']);
+        $test = '';
     }
-    
-    public function updateSku()
-    {
-        
-    }
-
 }
