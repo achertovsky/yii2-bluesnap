@@ -22,11 +22,12 @@ class Core extends \yii\db\ActiveRecord
     public function getData()
     {
         $result = [];
-        foreach (get_object_vars($this) as $var) {
-            if (empty($this->$var)) {
+        $vars = get_object_vars($this);
+        foreach ($vars as $name => $var) {
+            if (empty($this->$name)) {
                 continue;
             }
-            $result[$var] = $this->$var;
+            $result[$name] = $var;
         }
         return $result; 
    }

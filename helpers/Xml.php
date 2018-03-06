@@ -17,14 +17,25 @@ class Xml extends \yii\base\Model
      * @param string $wrapBy
      * @param array $data
      */
-    public static function prepareBody($wrapBy, $data, $ignore = Xml::DEFAULT_IGNORE)
+    public static function prepareBody($wrapBy, $data, $firstLevel = true, $ignore = Xml::DEFAULT_IGNORE)
     {
-        $result = "<$wrapBy xmlns='http://ws.plimus.com'>";
+        if ($firstLevel) {
+            $result = "<$wrapBy xmlns='http://ws.plimus.com'>";
+        } else {
+            $result = "<$wrapBy>";
+        }
         foreach ($data as $fieldName => $value) {
+            $fieldName = str_replace('_', '-', $fieldName);
             if (in_array($fieldName, $ignore) || empty($value)) {
                 continue;
             }
-            $fieldName = str_replace('_', '-', $fieldName);
+            if (is_array($value)) {
+                $result .= Xml::prepareBody($fieldName, $value, false);
+                continue;
+            }
+            if (is_bool($value)) {
+                $value = $value ? "true" : "false";
+            }
             $result .= "<$fieldName>$value</$fieldName>";
         }
         $result .= "</$wrapBy>";

@@ -30,6 +30,23 @@ class PricingSettings extends Core
     const ROUNDING_UP_TO_1_DOLLAR = "ROUNDING UP TO 1.00";
     const ROUNDING_UP_TO_5_DOLLAR = "ROUNDING UP TO 5.00";
     
+    /**
+     * Possible period frequencies
+     */
+    const PERIOD_FREQUENCY_NONE = "NONE";
+    const PERIOD_FREQUENCY_ONCE = "ONCE";
+    const PERIOD_FREQUENCY_DAILY = "DAILY";
+    const PERIOD_FREQUENCY_WEEKLY = "WEEKLY";
+    const PERIOD_FREQUENCY_BIWEEKLY = "BIWEEKLY";
+    const PERIOD_FREQUENCY_MONTHLY = "MONTHLY";
+    const PERIOD_FREQUENCY_BIMONTHLY = "BIMONTHLY";
+    const PERIOD_FREQUENCY_QUARTERLY = "QUARTERLY";
+    const PERIOD_FREQUENCY_SEMIANNUALLY = "SEMIANNUALLY";
+    const PERIOD_FREQUENCY_ANNUALLY = "ANNUALLY";
+    const PERIOD_FREQUENCY_BIANNUALLY = "BIANNUALLY";
+    const PERIOD_FREQUENCY_TRIANNUALLY = "TRIANNUALLY";
+    const PERIOD_FREQUENCY_UPON_DEMAND = "UPON_DEMAND";
+    
     /** @var string */
     public $charge_policy_type;
     /** @var array */
@@ -112,6 +129,7 @@ class PricingSettings extends Core
     /**
      * @param decimal $amount
      * @param int $periodFrequency
+     * PricingSettings has constants for it
      * @param string $currency
      * @param bool $basePrice
      * @return array
@@ -129,6 +147,7 @@ class PricingSettings extends Core
     /**
      * @param decimal $amount
      * @param int $periodFrequency
+     * PricingSettings has constants for it
      * @param int $trialLenght
      * @param string $currency
      * @param string $trialInterval
@@ -149,6 +168,7 @@ class PricingSettings extends Core
     /**
      * @param decimal $amount
      * @param int $periodFrequency
+     * PricingSettings has constants for it
      * @param int $initialPeriod
      * @param decimal $initialAmount
      * @param string $currency

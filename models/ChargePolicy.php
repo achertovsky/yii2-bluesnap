@@ -62,12 +62,10 @@ class ChargePolicy extends Core
     {
         $this->initial_period = [
             'catalog_prices' => [
-                'catalog_prices' => [
-                    'catalog_price' => [
-                        'amount' => $amount,
-                        'base_price' => $basePrice,
-                        'currency' => $currency,
-                    ]
+                'catalog_price' => [
+                    'amount' => $amount,
+                    'base_price' => $basePrice,
+                    'currency' => $currency,
                 ]
             ],
             'period_length' => $periodLength,
@@ -78,6 +76,7 @@ class ChargePolicy extends Core
     /**
      * Fill depending on https://developers.bluesnap.com/v8976-Extended/docs/initial-period
      * @param int $periodFrequency
+     * PricingSettings has constants for it
      * @param decimal $amount
      * @param string $interval
      * @param string $currency
@@ -87,12 +86,10 @@ class ChargePolicy extends Core
     {
         $this->recurring_period = [
             'catalog_prices' => [
-                'catalog_prices' => [
-                    'catalog_price' => [
-                        'amount' => $amount,
-                        'base_price' => $basePrice,
-                        'currency' => $currency,
-                    ]
+                'catalog_price' => [
+                    'amount' => $amount,
+                    'base_price' => $basePrice,
+                    'currency' => $currency,
                 ]
             ],
             'period_frequency' => $periodFrequency,

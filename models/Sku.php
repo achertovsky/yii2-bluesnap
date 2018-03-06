@@ -91,6 +91,16 @@ class Sku extends Core
         return 'bluesnap_sku';
     }
 
+    /** @inheritdoc */
+    public function scenarios()
+    {
+        return ArrayHelper::merge(
+            parent::scenarios(),
+            [
+                'create' => ['product_id', 'sku_type', 'pricing_settings']
+            ]
+        );
+    }
     /**
      * @inheritdoc
      */
@@ -131,6 +141,7 @@ class Sku extends Core
     
     /**
      * Receives SKU object and saves it to db
+     * Docs: https://developers.bluesnap.com/v8976-Extended/docs/retrieve-sku
      * @return \achertovsky\bluesnap\models\Sku
      */
     public function getSku()
@@ -150,13 +161,52 @@ class Sku extends Core
         return null;
     }
     
+    /**
+     * encoding/decoding fields that is arrays/json
+     * @param type $action
+     */
+    public function processArrays($action = 'encode')
+    {
+        $arrayFields = ['pricing_settings', 'sku_quantity_policy', 'sku_effective_dates', 'sku_coupon_settings', 'sku_custom_parameters'];
+        foreach ($arrayFields as $field) {
+            if ($action == 'encode') {
+                if (is_array($this->$field)) {
+                    $this->$field = Json::$action($this->$field);
+                }
+            } elseif ($action == 'decode') {
+                try {
+                    $this->$field = Json::$action($this->$field);
+                } catch (\Exception $ex) {
+                    $this->$field = null;
+                }
+            }
+        }
+    }
+    
+    
+    
     /** @inheritdoc */
     public function beforeValidate()
     {
         if (parent::beforeValidate()) {
-            if (is_array($this->pricing_settings)) {
-                $this->pricing_settings = Json::encode($this->pricing_settings);
-            }
+            $this->processArrays();
+            return true;
+        }
+        return false;
+    }
+    
+    /** @inheritdoc */
+    public function afterValidate()
+    {
+        $this->processArrays('decode');
+        parent::afterValidate();
+    }
+    
+    /** @inheritdoc */
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            $this->processArrays();
             return true;
         }
         return false;
@@ -166,7 +216,7 @@ class Sku extends Core
     public function afterFind()
     {
         parent::afterFind();
-        $this->pricing_settings = Json::decode($this->pricing_settings);
+        $this->processArrays('decode');
     }
     
     /**
@@ -220,5 +270,147 @@ class Sku extends Core
         $this->sku_custom_parameters = [
             'sku_custom_parameter' => $parameters,
         ];
+    }
+    
+    /**
+     * Updates SKU
+     * Docs: https://developers.bluesnap.com/v8976-Extended/docs/update-sku
+     * @return boolean|\achertovsky\bluesnap\models\Sku
+     */
+    public function updateSku()
+    {
+        if (!$this->validate()) {
+            return false;
+        }
+        $body = Xml::prepareBody('catalog_sku', $this->getAttributes());
+        $response = Request::put(
+            $this->url.'/'.$this->sku_id,
+            $body,
+            [
+                'Content-Type' => 'application/xml',
+                'Authorization' => $this->module->authToken,
+            ]
+        );
+        $code = $response->getStatusCode();
+        //docs says 204 - success
+        if ($code == 204) {
+            if ($this->save()) {
+                return $this;
+            } 
+        }
+        return false;
+    }
+    
+    /**
+     * Deletes SKU
+     * Docs: https://developers.bluesnap.com/v8976-Extended/docs/update-sku
+     * @return boolean|\achertovsky\bluesnap\models\Sku
+     */
+    public function deleteSku()
+    {
+        $this->sku_status = self::SKU_STATUS_DELETED;
+        return $this->updateSku();
+    }
+    
+    /**
+     * Updates SKU
+     * Docs: https://developers.bluesnap.com/v8976-Extended/docs/create-sku
+     * @param string $type
+     * @return boolean|\achertovsky\bluesnap\models\Sku
+     */
+    public function createSku($type = self::SKU_TYPE_DIGITAL)
+    {
+        $this->sku_type = $type;
+        $this->scenario = 'create';
+        if (!$this->validate()) {
+            return false;
+        }
+        $this->scenario = 'default';
+        $body = Xml::prepareBody('catalog-sku', $this->getAttributes());
+        $response = Request::post(
+            $this->url,
+            $body,
+            [
+                'Content-Type' => 'application/xml',
+                'Authorization' => $this->module->authToken,
+            ]
+        );
+        $code = $response->getStatusCode();
+        //docs says 201 - success
+        if ($code == 201) {
+            //get sku id from response
+            $headers = $response->getHeaders();
+            if (isset($headers['location'])) {
+                $location = $headers['location'];
+                $this->sku_id = substr($location, strrpos($location, '/')+1);
+            }
+            if ($this->save()) {
+                return $this;
+            } 
+        }
+        return false;
+    }
+    
+    /**
+     * @param decimal $amount
+     * @param string $currency
+     * @param bool $basePrice
+     */
+    public function prepareOneTimePayment($amount, $currency = 'USD', $basePrice = true)
+    {
+        $this->pricing_settings = (new PricingSettings)->getOneTimePayment($amount, $currency, $basePrice);
+    }
+    
+    /**
+     * @param decimal $amount
+     * @param int $trialLenght
+     * @param string $currency
+     * @param string $trialInterval
+     * @param bool $basePrice
+     */
+    public function prepareOneTimePaymentWithTrial($amount, $trialLenght, $currency = 'USD', $trialInterval = ChargePolicy::INTERVAL_DAYS, $basePrice = true)
+    {
+        $this->pricing_settings = (new PricingSettings)->getOneTimePaymentWithTrial($amount, $trialLenght, $currency, $trialInterval, $basePrice);
+    }
+    
+    /**
+     * @param decimal $amount
+     * @param int $periodFrequency
+     * PricingSettings has constants for it
+     * @param string $currency
+     * @param bool $basePrice
+     */
+    public function prepareSubscription($amount, $periodFrequency, $currency = 'USD', $basePrice = true)
+    {
+        $this->pricing_settings = (new PricingSettings)->getSubscription($amount, $periodFrequency, $currency, $basePrice);
+    }
+    
+    /**
+     * @param decimal $amount
+     * @param int $periodFrequency
+     * PricingSettings has constants for it
+     * @param int $trialLenght
+     * @param string $currency
+     * @param string $trialInterval
+     * @param bool $basePrice
+     */
+    public function prepareSubscriptionWithTrial($amount, $periodFrequency, $trialLenght, $currency = 'USD', $trialInterval = ChargePolicy::INTERVAL_DAYS, $basePrice = true)
+    {
+        $this->pricing_settings = (new PricingSettings)->getSubscriptionWithTrial($amount, $periodFrequency, $trialLenght, $currency, $trialInterval, $basePrice);
+    }
+    
+    /**
+     * @param decimal $amount
+     * @param int $periodFrequency
+     * PricingSettings has constants for it
+     * @param int $initialPeriod
+     * @param decimal $initialAmount
+     * @param string $currency
+     * @param string $initialInterval
+     * @param bool $basePrice
+     */
+    public function prepareSubscriptionWithInitialCharge($amount, $periodFrequency, $initialPeriod, $initialAmount, $currency = 'USD', $initialInterval = ChargePolicy::INTERVAL_DAYS, $basePrice = true)
+    {
+        $this->pricing_settings = (new PricingSettings)->getSubscriptionWithInitialCharge($amount, $periodFrequency, $initialPeriod, $initialAmount, $currency, $initialInterval, $basePrice);
     }
 }
