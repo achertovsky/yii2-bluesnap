@@ -58,6 +58,14 @@ class Sku extends Core
     const SKU_TYPE_DIGITAL = 'DIGITAL';
     
     /**
+     * List of possible coupons
+     */
+    const SKU_COUPON_ENABLE = "ENABLE";
+    const SKU_COUPON_DISABLE = "DISABLE";
+    const SKU_COUPON_ENABLE_MANDATORY = "ENABLE_MANDATORY";
+    const SKU_COUPON_PARAMETER_ONLY = "PARAMETER_ONLY";
+    
+    /**
      * List of urls for api requests
      * @var string
      */
@@ -159,5 +167,58 @@ class Sku extends Core
     {
         parent::afterFind();
         $this->pricing_settings = Json::decode($this->pricing_settings);
+    }
+    
+    /**
+     * @param bool $allowQuantityChange
+     * Indicates whether it is possible to change the ordered quantity for this SKU.
+     * @param int $minimumQuantity
+     * Minimum quantity to order for this SKU.
+     */
+    public function setSkuQuantityPolicy($allowQuantityChange = true, $minimumQuantity = 1)
+    {
+        $this->sku_quantity_policy = [
+            'allow_quantity_change' => $allowQuantityChange,
+            'minimum_quantity' => $minimumQuantity,
+        ];
+    }
+    
+    /**
+     * 
+     * @param string $effectiveFrom
+     * Effective start date of the SKU.
+     * Format: DD-MMM-YY
+     * @param string $effectiveTill
+     * Effective end date of the SKU.
+     * Format: DD-MMM-YY
+     */
+    public function setSkuEffectiveDates($effectiveFrom, $effectiveTill)
+    {
+        $this->sku_effective_dates = [
+            'effective_from' => $effectiveFrom,
+            'effective_till' => $effectiveTill,
+        ];
+    }
+    
+    /**
+     * @param string $couponSetting
+     */
+    public function setSkuCouponSettings($couponSetting = self::SKU_COUPON_DISABLE)
+    {
+        $this->sku_coupon_settings = [
+            'sku_coupon_setting' => $couponSetting,
+        ];
+    }
+    
+    /**
+     * Container of sku-custom-parameter properties.
+     * This property may appear more than once within the resource.
+     * @param array $parameters
+     */
+    public function setSkuCustomParameters($parameters)
+    {
+        $this->sku_custom_parameters = [
+            'sku_custom_parameter' => $parameters,
+        ];
     }
 }

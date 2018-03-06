@@ -7,7 +7,7 @@ use achertovsky\bluesnap\models\ChargePolicy;
 /**
  * @author alexander
  */
-class SkuPricingSettings extends Core
+class PricingSettings extends Core
 {
     /**
      * Possible policy types
