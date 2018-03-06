@@ -5,6 +5,10 @@ namespace achertovsky\bluesnap\models;
 use Yii;
 use achertovsky\bluesnap\models\Core;
 use achertovsky\bluesnap\helpers\Request;
+use achertovsky\bluesnap\helpers\Xml;
+use yii\helpers\Json;
+use yii\helpers\ArrayHelper;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "bluesnap_sku".
@@ -27,6 +31,19 @@ use achertovsky\bluesnap\helpers\Request;
  */
 class Sku extends Core
 {
+    /** @inheritdoc */
+    public function behaviors()
+    {
+        return ArrayHelper::merge(
+            parent::behaviors(),
+            [
+                [
+                    'class' => TimestampBehavior::className(),
+                ],
+            ]
+        );
+    }
+    
     /**
      * List of possible sku status codes
      */
@@ -72,9 +89,10 @@ class Sku extends Core
     public function rules()
     {
         return [
+            [['sku_id'], 'unique'],
             [['product_id', 'sku_type', 'pricing_settings', 'sku_id'], 'required'],
-            [['created_at', 'updated_at', 'contract_name', 'product_id', 'collect_shipping_address', 'sku_id'], 'integer'],
-            [['pricing_settings', 'sku_image', 'sku_quantity_policy', 'sku_effective_dates', 'sku_coupon_settings', 'sku_custom_parameters'], 'string'],
+            [['created_at', 'updated_at', 'product_id', 'collect_shipping_address', 'sku_id'], 'integer'],
+            [['pricing_settings', 'contract_name', 'sku_image', 'sku_quantity_policy', 'sku_effective_dates', 'sku_coupon_settings', 'sku_custom_parameters'], 'string'],
             [['sku_status'], 'string', 'max' => 1],
             [['sku_type'], 'string', 'max' => 255],
         ];
@@ -103,6 +121,10 @@ class Sku extends Core
         ];
     }
     
+    /**
+     * Receives SKU object and saves it to db
+     * @return \achertovsky\bluesnap\models\Sku
+     */
     public function getSku()
     {
         $content = Request::get(
@@ -113,7 +135,29 @@ class Sku extends Core
             ]
         )->getContent();
         $response = Xml::parse($content);
-        $this->setAttributes($response['catalog-sku']);
-        $test = '';
+        $this->setAttributes($response['catalog_sku']);
+        if ($this->save()) {
+            return $this;
+        }
+        return null;
+    }
+    
+    /** @inheritdoc */
+    public function beforeValidate()
+    {
+        if (parent::beforeValidate()) {
+            if (is_array($this->pricing_settings)) {
+                $this->pricing_settings = Json::encode($this->pricing_settings);
+            }
+            return true;
+        }
+        return false;
+    }
+    
+    /** @inheritdoc */
+    public function afterFind()
+    {
+        parent::afterFind();
+        $this->pricing_settings = Json::decode($this->pricing_settings);
     }
 }

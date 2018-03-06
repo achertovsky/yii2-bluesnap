@@ -67,7 +67,7 @@ class Xml extends \yii\base\Model
                 return $result;
             }
             $tag = str_replace('-', '_', strtolower($xmlPart['tag']));
-            $value = $xmlPart['value'];
+            $value = isset($xmlPart['value']) ? $xmlPart['value'] : '';
             switch ($type) {
                 case 'open':
                     if ($openName == '') {
@@ -75,7 +75,10 @@ class Xml extends \yii\base\Model
                         $openName = $tag;
                     } else {
                         //if there is open tag - it means that this item is sublevel, gather data from lower level
-                        $result[$openName] = ArrayHelper::merge($result[$openName], self::getLevelData($array));
+                        $result[$openName] = ArrayHelper::merge(
+                            isset($result[$openName]) ? $result[$openName] : [],
+                            self::getLevelData($array)
+                        );
                     }
                     break;
                 case 'complete':
