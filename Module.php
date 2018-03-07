@@ -18,6 +18,7 @@ class Module extends \yii\base\Module
     public $defaultStoreId = '';
     public $clientSideEncryptionKey = '';
     public $authToken = '';
+    public $antiFraudSalt = '';
     
     /**
      * Determine if use sandbox or not
@@ -35,7 +36,7 @@ class Module extends \yii\base\Module
         if (!empty($this->username) && !empty($this->password)) {
             $this->authToken = "Basic ".base64_encode($this->username.':'.$this->password);
         }
-        $paramsToCheck = ['authToken', 'defaultStoreId', 'clientSideEncryptionKey'];
+        $paramsToCheck = ['authToken', 'defaultStoreId', 'clientSideEncryptionKey', 'antiFraudSalt'];
         foreach ($paramsToCheck as $param) {
             if (empty($this->$param)) {
                 throw new InvalidConfigException("No value for $param param provided");

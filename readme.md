@@ -11,6 +11,7 @@ return [
             'clientSideEncryptionKey' => 'fillme',
             'username' => 'fillme',
             'password' => 'fillme',
+            'antiFraudSalt' => 'some word/phrase/anything that u want to use. it gonna be used to generate antifraud token. make sure only u and trusted people know it :)',
             // OR
             // code below is instruction how to fill 'authToken' field. Refer https://developers.bluesnap.com/docs/authentication
             // (module gonna do same if u provide username and pwd instead)

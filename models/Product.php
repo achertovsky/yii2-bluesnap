@@ -3,7 +3,6 @@
 namespace achertovsky\bluesnap\models;
 
 use yii\helpers\ArrayHelper;
-use yii\behaviors\TimestampBehavior;
 use achertovsky\bluesnap\helpers\Xml;
 use achertovsky\bluesnap\helpers\Request;
 use achertovsky\bluesnap\models\Sku;
@@ -46,30 +45,6 @@ class Product extends Core
     protected $url = '';
     protected $sandboxUrl = 'https://sandbox.bluesnap.com/services/2/catalog/products';
     protected $liveUrl = 'https://ws.bluesnap.com/services/2/catalog/products';
-    
-    /** @inheritdoc */
-    public function setUrl()
-    {
-        if ($this->module->sandbox) {
-            $this->url = $this->sandboxUrl;
-        } else {
-            $this->url = $this->liveUrl;
-        }
-    }
-    
-    
-    /** @inheritdoc */
-    public function behaviors()
-    {
-        return ArrayHelper::merge(
-            parent::behaviors(),
-            [
-                [
-                    'class' => TimestampBehavior::className(),
-                ],
-            ]
-        );
-    }
     
     /** @inheritdoc */
     public function scenarios()

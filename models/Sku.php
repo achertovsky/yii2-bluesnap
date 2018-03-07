@@ -8,7 +8,6 @@ use achertovsky\bluesnap\helpers\Request;
 use achertovsky\bluesnap\helpers\Xml;
 use yii\helpers\Json;
 use yii\helpers\ArrayHelper;
-use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "bluesnap_sku".
@@ -31,19 +30,6 @@ use yii\behaviors\TimestampBehavior;
  */
 class Sku extends Core
 {
-    /** @inheritdoc */
-    public function behaviors()
-    {
-        return ArrayHelper::merge(
-            parent::behaviors(),
-            [
-                [
-                    'class' => TimestampBehavior::className(),
-                ],
-            ]
-        );
-    }
-    
     /**
      * List of possible sku status codes
      */
@@ -69,19 +55,8 @@ class Sku extends Core
      * List of urls for api requests
      * @var string
      */
-    protected $url = '';
     protected $sandboxUrl = 'https://sandbox.bluesnap.com/services/2/catalog/skus';
     protected $liveUrl = 'https://ws.bluesnap.com/services/2/catalog/skus';
-    
-    /** @inheritdoc */
-    public function setUrl()
-    {
-        if ($this->module->sandbox) {
-            $this->url = $this->sandboxUrl;
-        } else {
-            $this->url = $this->liveUrl;
-        }
-    }
     
     /**
      * @inheritdoc
@@ -117,29 +92,6 @@ class Sku extends Core
     }
 
     /**
-     * @inheritdoc
-     */
-    public function attributeLabels()
-    {
-        return [
-            'id' => 'ID',
-            'created_at' => 'Created At',
-            'updated_at' => 'Updated At',
-            'contract_name' => 'Contract Name',
-            'product_id' => 'Product ID',
-            'sku_status' => 'Sku Status',
-            'sku_type' => 'Sku Type',
-            'pricing_settings' => 'Pricing Settings',
-            'sku_image' => 'Sku Image',
-            'sku_quantity_policy' => 'Sku Quantity Policy',
-            'collect_shipping_address' => 'Collect Shipping Address',
-            'sku_effective_dates' => 'Sku Effective Dates',
-            'sku_coupon_settings' => 'Sku Coupon Settings',
-            'sku_custom_parameters' => 'Sku Custom Parameters',
-        ];
-    }
-    
-    /**
      * Receives SKU object and saves it to db
      * Docs: https://developers.bluesnap.com/v8976-Extended/docs/retrieve-sku
      * @return \achertovsky\bluesnap\models\Sku
@@ -162,62 +114,9 @@ class Sku extends Core
     }
     
     /**
-     * encoding/decoding fields that is arrays/json
-     * @param type $action
+     * @inheritdoc
      */
-    public function processArrays($action = 'encode')
-    {
-        $arrayFields = ['pricing_settings', 'sku_quantity_policy', 'sku_effective_dates', 'sku_coupon_settings', 'sku_custom_parameters'];
-        foreach ($arrayFields as $field) {
-            if ($action == 'encode') {
-                if (is_array($this->$field)) {
-                    $this->$field = Json::$action($this->$field);
-                }
-            } elseif ($action == 'decode') {
-                try {
-                    $this->$field = Json::$action($this->$field);
-                } catch (\Exception $ex) {
-                    $this->$field = null;
-                }
-            }
-        }
-    }
-    
-    
-    
-    /** @inheritdoc */
-    public function beforeValidate()
-    {
-        if (parent::beforeValidate()) {
-            $this->processArrays();
-            return true;
-        }
-        return false;
-    }
-    
-    /** @inheritdoc */
-    public function afterValidate()
-    {
-        $this->processArrays('decode');
-        parent::afterValidate();
-    }
-    
-    /** @inheritdoc */
-    public function beforeSave($insert)
-    {
-        if (parent::beforeSave($insert)) {
-            $this->processArrays();
-            return true;
-        }
-        return false;
-    }
-    
-    /** @inheritdoc */
-    public function afterFind()
-    {
-        parent::afterFind();
-        $this->processArrays('decode');
-    }
+    public $jsonFields = ['pricing_settings', 'sku_quantity_policy', 'sku_effective_dates', 'sku_coupon_settings', 'sku_custom_parameters'];
     
     /**
      * @param bool $allowQuantityChange
