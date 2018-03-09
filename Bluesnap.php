@@ -6,6 +6,7 @@ use yii\base\InvalidConfigException;
 use achertovsky\bluesnap\models\Product;
 use Yii;
 use achertovsky\bluesnap\models\Sku;
+use achertovsky\bluesnap\models\Shopper;
 
 /**
  * Component contains all required actions
@@ -33,7 +34,8 @@ class Bluesnap extends \yii\base\Object
      * Alias for getCommon
      * @param array $where
      * @param string $indexBy
-     * @return array of Product
+     * @return Product
+     * Array of Product
      */
     public function getProductModel($where = [], $indexBy = 'product_id')
     {
@@ -44,11 +46,24 @@ class Bluesnap extends \yii\base\Object
      * Alias for getCommon
      * @param array $where
      * @param string $indexBy
-     * @return array of Sku
+     * @return Sku
+     * Array of Sku
      */
     public function getSkuModel($where = [], $indexBy = 'product_id')
     {
         return $this->getCommon(Sku::className(), $where, $indexBy);
+    }
+    
+    /**
+     * Alias for getCommon
+     * @param array $where
+     * @param string $indexBy
+     * @return Shopper
+     * Array of Shopper
+     */
+    public function getShopperModel($where = [], $indexBy = 'id')
+    {
+        return $this->getCommon(Shopper::className(), $where, $indexBy);
     }
     
     /**

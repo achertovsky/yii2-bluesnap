@@ -5,6 +5,7 @@ namespace achertovsky\bluesnap\models;
 use achertovsky\bluesnap\Module;
 use yii\behaviors\TimestampBehavior;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 
 /**
  * Contains common fields for all models of module

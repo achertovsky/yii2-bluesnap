@@ -182,6 +182,9 @@ class Product extends Core
      */
     public function getProduct($productId, $saveToDb = false)
     {
+        if ($this->product_id != $productId) {
+            $this->isNewRecord = true;
+        }
         $this->product_id = $productId;
         $content = Request::get(
             $this->url.'/'.$productId,

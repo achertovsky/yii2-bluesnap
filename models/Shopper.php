@@ -1,10 +1,14 @@
 <?php
 
-namespace backend\models;
+namespace achertovsky\bluesnap\models;
 
 use Yii;
 use achertovsky\bluesnap\models\Core;
 use achertovsky\bluesnap\models\ShopperInfo;
+use yii\helpers\ArrayHelper;
+use achertovsky\bluesnap\helpers\Xml;
+use achertovsky\bluesnap\helpers\Request;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "bluesnap_shopper".
@@ -27,6 +31,22 @@ class Shopper extends Core
         return 'bluesnap_shopper';
     }
     
+    /** @inheritdoc */
+    public function scenarios()
+    {
+        return ArrayHelper::merge(
+            parent::scenarios(),
+            [
+                'create' => [
+                    'web_info', 'fraud_info', 'shopper_info', 'user_id', 'wallet_id', 'shopper_id'
+                ],
+                'get' => [
+                    'shopper_info', 'user_id', 'wallet_id', 'shopper_id'
+                ],
+            ]
+        );
+    }
+    
     /**
      * List of urls for api requests
      * @var string
@@ -38,6 +58,7 @@ class Shopper extends Core
     public function rules()
     {
         return [
+            [['user_id', 'shopper_id'], 'unique'],
             [['created_at', 'updated_at', 'wallet_id', 'user_id', 'shopper_id'], 'integer'],
             [['web_info', 'fraud_info', 'shopper_info'], 'string'],
             [['web_info', 'fraud_info', 'shopper_info', 'user_id', 'shopper_id'], 'required'],
@@ -99,8 +120,8 @@ class Shopper extends Core
      */
     public function setShopperInfo(ShopperInfo $shopper, $storeId = null)
     {
+        $shopper->store_id = is_null($storeId) ? $this->module->defaultStoreId : $storeId;
         $this->shopper_info = $shopper->getData();
-        $this->shopper_info['store_id'] = is_null($storeId) ? $this->module->defaultStoreId : $storeId;
     }
     
     /**
@@ -109,5 +130,108 @@ class Shopper extends Core
     public function getShopperInfo()
     {
         return new ShopperInfo($this->shopper_info);
+    }
+    
+    /**
+     * Docs: https://developers.bluesnap.com/v8976-Extended/docs/create-shopper
+     * @return boolean|\achertovsky\bluesnap\models\Shopper
+     */
+    public function createShopper()
+    {
+        $this->scenario = 'create';
+        if (!$this->validate()) {
+            return false;
+        }
+        $this->scenario = 'default';
+        $body = Xml::prepareBody('shopper', $this->getAttributes());
+        $response = Request::post(
+            $this->url,
+            $body,
+            [
+                'Content-Type' => 'application/xml',
+                'Authorization' => $this->module->authToken,
+            ]
+        );
+        $code = $response->getStatusCode();
+        //docs says 201 - success
+        if ($code == 201) {
+            //get shopper id from response
+            $headers = $response->getHeaders();
+            if (isset($headers['location'])) {
+                $location = $headers['location'];
+                $this->shopper_id = substr($location, strrpos($location, '/')+1);
+            }
+            if ($this->save()) {
+                return $this;
+            } 
+        }
+        return false;
+    }
+    
+    
+    /**
+     * Docs: https://developers.bluesnap.com/v8976-Extended/docs/update-shopper
+     * @return boolean|\achertovsky\bluesnap\models\Shopper
+     */
+    public function updateShopper()
+    {
+        if (!$this->validate()) {
+            return false;
+        }
+        $body = Xml::prepareBody('shopper', $this->getAttributes());
+        $response = Request::put(
+            $this->url.'/'.$this->shopper_id,
+            $body,
+            [
+                'Content-Type' => 'application/xml',
+                'Authorization' => $this->module->authToken,
+            ]
+        );
+        $code = $response->getStatusCode();
+        //docs says 204 - success
+        if ($code == 204) {
+            if ($this->save()) {
+                return $this;
+            } 
+        }
+        return false;
+    }
+    
+    public function getShopper($shopperId, $sellerShopperId = null)
+    {
+        if ($this->shopper_id != $shopperId) {
+            $this->isNewRecord = true;
+        }
+        $this->scenario = 'get';
+        $this->shopper_id = $shopperId;
+        $content = Request::get(
+            $this->url.'/'.(!is_null($sellerShopperId) ? $sellerShopperId.','.$this->module->sellerId : $shopperId),
+            [
+                'Content-Type' => 'application/xml',
+                'Authorization' => $this->module->authToken,
+            ]
+        )->getContent();
+        $response = Xml::parse($content);
+        $this->setAttributes($response['shopper']);
+        if (!$this->validate() || !$this->save()) {
+            return false;
+        }
+        return $this;
+    }
+    
+    /**
+     * Dont store to db payment info
+     * @inheritdoc
+     */
+    public function beforeSave($insert)
+    {
+        if (ActiveRecord::beforeSave($insert)) {
+            $si = $this->shopper_info;
+            unset($si['payment_info']);
+            $this->shopper_info = $si;
+            $this->processArrays();
+            return true;
+        }
+        return false;
     }
 }

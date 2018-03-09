@@ -26,6 +26,9 @@ class Xml extends \yii\base\Model
         }
         foreach ($data as $fieldName => $value) {
             $fieldName = str_replace('_', '-', $fieldName);
+            if (is_numeric($fieldName)) {
+                $fieldName = key($data[$fieldName]);
+            }
             if (in_array($fieldName, $ignore) || empty($value)) {
                 continue;
             }
@@ -49,8 +52,9 @@ class Xml extends \yii\base\Model
      */
     public static function parse($xml)
     {
-        $xmlArray = [];
-        $xmlData = xml_parse_into_struct(xml_parser_create(), $xml, $xmlArray);
+        $parser = xml_parser_create();
+        xml_parse_into_struct($parser, $xml, $xmlArray);
+        xml_parser_free($parser);
         $result = self::getLevelData($xmlArray);
         return $result;
     }

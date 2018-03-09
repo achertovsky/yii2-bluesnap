@@ -90,39 +90,13 @@ class ShopperInfo extends Core
     public $shipping_contact_info;
     
     /**
-     * @param string $firstName
-     * @param string $lastName
-     * @param string $address1
-     * Address line 1 for shipping.
-     * Between 2-42 characters.
-     * @param string $city
-     * @param string $zip
-     * @param string $country
-     * Country code for shipping.
-     * See https://developers.bluesnap.com/docs/country-codes
-     * @param string $state
-     * State code for shipping.
-     * See https://developers.bluesnap.com/docs/state-and-province-codes.
-     * Supports US and Canada states only. For states in other countries, it is necessary to include the state in the address property.
-     * @param string $address2
-     * Same as address1
+     * <b>Should be used after setShopperContactInfo() or when this data already present</b>
      */
-    public function setShippingContactInfo($firstName, $lastName, $address1, $city, $zip, $country, $state = null, $address2 = null)
+    public function setShippingContactInfo()
     {
-        $this->shipping_contact_info = [
-            'first_name' => $firstName,
-            'last_name' => $lastName,
-            'address1' => $address1,
-            'city' => $city,
-            'zip' => $zip,
-            'country' => $country,
-        ];
-        
-        if (!is_null($address2)) {
-            $this->shipping_contact_info['address2'] = $address2;
-        }
-        if (!is_null($state)) {
-            $this->shipping_contact_info['state'] = $state;
+        $info = $this->gatherBillingInfo();
+        foreach ($info as $key => $value) {
+            $this->shipping_contact_info[$key] = $value;
         }
     }
     
