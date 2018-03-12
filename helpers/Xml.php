@@ -24,6 +24,7 @@ class Xml extends \yii\base\Model
         } else {
             $result = "<$wrapBy>";
         }
+        $result = empty($wrapBy) ? '' : $result;
         foreach ($data as $fieldName => $value) {
             $fieldName = str_replace('_', '-', $fieldName);
             if (is_numeric($fieldName)) {
@@ -33,7 +34,7 @@ class Xml extends \yii\base\Model
                 continue;
             }
             if (is_array($value)) {
-                $result .= Xml::prepareBody($fieldName, $value, false);
+                $result .= Xml::prepareBody($fieldName == $wrapBy ? '' : $fieldName, $value, false);
                 continue;
             }
             if (is_bool($value)) {
@@ -41,7 +42,7 @@ class Xml extends \yii\base\Model
             }
             $result .= "<$fieldName>$value</$fieldName>";
         }
-        $result .= "</$wrapBy>";
+        $result .= empty($wrapBy) ? '' : "</$wrapBy>";
         return $result;
     }
     
