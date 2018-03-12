@@ -3,12 +3,14 @@
 namespace achertovsky\bluesnap\models;
 
 use achertovsky\bluesnap\models\ChargePolicy;
+use achertovsky\bluesnap\traits\Common;
 
 /**
  * @author alexander
  */
-class PricingSettings extends Core
+class PricingSettings
 {
+    use Common;
     /**
      * Possible policy types
      */

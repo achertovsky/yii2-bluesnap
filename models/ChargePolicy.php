@@ -1,11 +1,14 @@
 <?php
 
 namespace achertovsky\bluesnap\models;
+
+use achertovsky\bluesnap\traits\Common;
 /**
  * @author alexander
  */
-class ChargePolicy extends Core
+class ChargePolicy
 {
+    use Common;
     /** @var array */
     public $one_time_charge;
     /** @var array */
