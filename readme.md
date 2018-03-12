@@ -1,4 +1,4 @@
-#Introduction
+# Introduction
 
 Greetings, stranger. 
   
@@ -8,7 +8,7 @@ Please, don't hesitate talk to me and report issues.
 Best regards,
 Alexander Chertovsky
 
-#Instalation manual
+# Instalation manual
 
 Inside config make
 
@@ -38,6 +38,6 @@ return [
 ];
 ```
 
-#Usage examples
+# Usage examples
 
 Check wiki for usage examples.
