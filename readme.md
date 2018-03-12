@@ -10,6 +10,8 @@ Alexander Chertovsky
 
 # Instalation manual
 
+## 1
+
 Inside config make
 
 ```php
@@ -37,6 +39,13 @@ return [
     ],
 ];
 ```
+## 2
+
+Login to your dashboard and in sidebar find "Payment methods". Fill "Data Protection Key" field there by any value. **WARNING** i assume after changing you wont be able to decrypt already encrypted parameters.
+
+## 3 
+
+Configure your IPN url according this manual https://support.bluesnap.com/docs/ipn-setup
 
 # Usage examples
 
