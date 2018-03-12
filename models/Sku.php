@@ -6,8 +6,8 @@ use Yii;
 use achertovsky\bluesnap\models\Core;
 use achertovsky\bluesnap\helpers\Request;
 use achertovsky\bluesnap\helpers\Xml;
-use yii\helpers\Json;
 use yii\helpers\ArrayHelper;
+use achertovsky\bluesnap\models\Sku;
 
 /**
  * This is the model class for table "bluesnap_sku".
@@ -94,7 +94,7 @@ class Sku extends Core
     /**
      * Receives SKU object and saves it to db
      * Docs: https://developers.bluesnap.com/v8976-Extended/docs/retrieve-sku
-     * @return \achertovsky\bluesnap\models\Sku
+     * @return Sku
      */
     public function getSku()
     {

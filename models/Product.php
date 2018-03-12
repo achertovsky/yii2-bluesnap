@@ -6,6 +6,7 @@ use yii\helpers\ArrayHelper;
 use achertovsky\bluesnap\helpers\Xml;
 use achertovsky\bluesnap\helpers\Request;
 use achertovsky\bluesnap\models\Sku;
+use Yii;
 
 /**
  * @author alexander
@@ -237,5 +238,19 @@ class Product extends Core
             $sku->sku_id = substr($location, strrpos($location, '/')+1);
             $sku->getSku();
         }
+    }
+    
+    /**
+     * @return 
+     */
+    public function getSkus()
+    {
+        $skus = Yii::$app->bluesnap->getSkuModel(
+            [
+                'and',
+                ['=', 'product_id', $this->product_id],
+            ]
+        );
+        return $skus;
     }
 }
