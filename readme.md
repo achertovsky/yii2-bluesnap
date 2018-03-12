@@ -41,7 +41,8 @@ return [
 ```
 ## 2
 
-Login to your dashboard and in sidebar find "Payment methods". Fill "Data Protection Key" field there by any value. **WARNING** i assume after changing you wont be able to decrypt already encrypted parameters.
+Run through this manual https://support.bluesnap.com/page/setting-up-your-data-protection-key-1   
+**WARNING** i assume after changing you wont be able to decrypt already encrypted parameters.
 
 ## 3 
 
