@@ -2,7 +2,7 @@
 
 namespace achertovsky\bluesnap\models;
 
-use achertovsky\bluesnap\models\Core;
+use achertovsky\bluesnap\traits\Common;
 /**
  * Wrapper for https://developers.bluesnap.com/v8976-Extended/docs/shopper-info
  * @author alexander
@@ -18,8 +18,9 @@ use achertovsky\bluesnap\models\Core;
  * @property array $shopper_contact_info
  * @property array $payment_info
  */
-class ShopperInfo extends Core
+class ShopperInfo extends \yii\base\Model
 {
+    use Common;
     /**
      * Unique shopper ID assigned by the merchant.
      * @var string
