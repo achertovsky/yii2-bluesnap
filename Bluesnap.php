@@ -8,6 +8,7 @@ use Yii;
 use achertovsky\bluesnap\models\Sku;
 use achertovsky\bluesnap\models\Shopper;
 use achertovsky\bluesnap\models\Encrypt;
+use achertovsky\bluesnap\models\Cart;
 
 /**
  * Component contains all required actions
@@ -129,5 +130,16 @@ class Bluesnap extends \yii\base\Object
     {
         $enc = $this->encrypt;
         return $enc->decryptParams($encryptedToken);
+    }
+    
+    /**
+     * @return Cart
+     */
+    public function getCart()
+    {
+        $cart = new Cart();
+        $cart->module = Yii::$app->getModule($this->moduleName);
+        $cart->setUrl();
+        return $cart;
     }
 }

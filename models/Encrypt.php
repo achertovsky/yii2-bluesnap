@@ -5,6 +5,7 @@ namespace achertovsky\bluesnap\models;
 use achertovsky\bluesnap\traits\Common;
 use achertovsky\bluesnap\helpers\Xml;
 use achertovsky\bluesnap\helpers\Request;
+use Yii;
 
 class Encrypt
 {

@@ -22,6 +22,12 @@ class Module extends \yii\base\Module
     public $sellerId = '';
     
     /**
+     * Number of minutes that the pre-populated checkout page will be available; maximum is 1440 minutes (i.e. 24 hours)
+     * @var int
+     */
+    public $expirationInMinutes = 30;
+    
+    /**
      * Determine if use sandbox or not
      * @var bool
      */
