@@ -7,6 +7,7 @@ use achertovsky\bluesnap\models\Product;
 use Yii;
 use achertovsky\bluesnap\models\Sku;
 use achertovsky\bluesnap\models\Shopper;
+use achertovsky\bluesnap\models\Encrypt;
 
 /**
  * Component contains all required actions
@@ -88,5 +89,45 @@ class Bluesnap extends \yii\base\Object
             $models[$key] = $model;
         }
         return $models;
+    }
+    
+    /**
+     * @var Encrypt|null 
+     */
+    protected $enc = null;
+    
+    /**
+     * @return Encrypt
+     */
+    protected function getEncrypt()
+    {
+        if (is_null($this->enc)) {
+            $this->enc = new Encrypt();
+            $this->enc->module = Yii::$app->getModule($this->moduleName);
+            $this->enc->setUrl();
+        }
+        return $this->enc;
+    }
+    
+    /**
+     * Alias for Encrypt
+     * Preinits requirements of Encrypt
+     * @param array $params
+     */
+    public function encryptParams($params)
+    {
+        $enc = $this->encrypt;
+        return $enc->encryptParams($params);
+    }
+    
+    /**
+     * Alias for Encrypt
+     * Preinits requirements of Encrypt
+     * @param string $encryptedToken
+     */
+    public function decryptParams($encryptedToken)
+    {
+        $enc = $this->encrypt;
+        return $enc->decryptParams($encryptedToken);
     }
 }
