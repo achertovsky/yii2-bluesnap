@@ -2,10 +2,10 @@
 
 Greetings, stranger. 
   
-Module designed for those who want use BlueSnap and write less as possible code. I hope, you would enjoy it.
+Module designed for those who want use BlueSnap and write less as possible code. I hope, you would enjoy it.   
 Please, don't hesitate talk to me and report issues.
   
-Best regards,
+Best regards,   
 Alexander Chertovsky
 
 # Instalation manual
