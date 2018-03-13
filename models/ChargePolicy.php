@@ -77,8 +77,8 @@ class ChargePolicy
     }
     
     /**
-     * Fill depending on https://developers.bluesnap.com/v8976-Extended/docs/initial-period
-     * @param int $periodFrequency
+     * Fill depending on https://developers.bluesnap.com/v8976-Extended/docs/recurring-period
+     * @param string $periodFrequency
      * PricingSettings has constants for it
      * @param decimal $amount
      * @param string $interval

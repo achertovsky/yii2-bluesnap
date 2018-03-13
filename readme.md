@@ -48,6 +48,11 @@ Run through this manual https://support.bluesnap.com/page/setting-up-your-data-p
 
 Configure your IPN url according this manual https://support.bluesnap.com/docs/ipn-setup
 
+## 4 (optional)
+
+To support paypal run through: https://support.bluesnap.com/docs/connecting-paypal-and-bluesnap
+Support paypal subscriptions: https://support.bluesnap.com/docs/enabling-subscriptions-with-paypal
+
 # Usage examples
 
 Check wiki for usage examples.

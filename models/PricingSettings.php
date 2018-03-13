@@ -130,7 +130,7 @@ class PricingSettings
     
     /**
      * @param decimal $amount
-     * @param int $periodFrequency
+     * @param string $periodFrequency
      * PricingSettings has constants for it
      * @param string $currency
      * @param bool $basePrice
@@ -148,7 +148,7 @@ class PricingSettings
     
     /**
      * @param decimal $amount
-     * @param int $periodFrequency
+     * @param string $periodFrequency
      * PricingSettings has constants for it
      * @param int $trialLenght
      * @param string $currency
@@ -169,7 +169,7 @@ class PricingSettings
     
     /**
      * @param decimal $amount
-     * @param int $periodFrequency
+     * @param string $periodFrequency
      * PricingSettings has constants for it
      * @param int $initialPeriod
      * @param decimal $initialAmount
