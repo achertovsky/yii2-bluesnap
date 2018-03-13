@@ -236,12 +236,13 @@ class Product extends Core
             $sku->setUrl();
             $location = $product->product_skus['url'];
             $sku->sku_id = substr($location, strrpos($location, '/')+1);
+            $sku->default = true;
             $sku->getSku();
         }
     }
     
     /**
-     * @return 
+     * @return array
      */
     public function getSkus()
     {
@@ -252,5 +253,23 @@ class Product extends Core
             ]
         );
         return $skus;
+    }
+    
+    /**
+     * @return Sku
+     */
+    public function getDefaultSku()
+    {
+        $sku = Yii::$app->bluesnap->getSkuModel(
+            [
+                'and',
+                ['=', 'product_id', $this->product_id],
+                ['=', 'default', true]
+            ]
+        );
+        if (empty($sku)) {
+            return null;
+        }
+        return reset($sku);
     }
 }

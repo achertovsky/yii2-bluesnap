@@ -27,6 +27,7 @@ use achertovsky\bluesnap\models\Sku;
  * @property string $sku_coupon_settings
  * @property string $sku_custom_parameters
  * @property integer $sku_id
+ * @property bool $default
  */
 class Sku extends Core
 {
@@ -88,6 +89,7 @@ class Sku extends Core
             [['pricing_settings', 'contract_name', 'sku_image', 'sku_quantity_policy', 'sku_effective_dates', 'sku_coupon_settings', 'sku_custom_parameters'], 'string'],
             [['sku_status'], 'string', 'max' => 1],
             [['sku_type'], 'string', 'max' => 255],
+            [['default'], 'boolean'],
         ];
     }
 
@@ -311,5 +313,27 @@ class Sku extends Core
     public function prepareSubscriptionWithInitialCharge($amount, $periodFrequency, $initialPeriod, $initialAmount, $currency = 'USD', $initialInterval = ChargePolicy::INTERVAL_DAYS, $basePrice = true)
     {
         $this->pricing_settings = (new PricingSettings)->getSubscriptionWithInitialCharge($amount, $periodFrequency, $initialPeriod, $initialAmount, $currency, $initialInterval, $basePrice);
+    }
+    
+    /**
+     * Making sure only 1 default exist
+     * @inheritdoc
+     */
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            if ($this->isAttributeChanged('default') && $this->default) {
+                Sku::updateAll(
+                    [
+                        'default' => false,
+                    ],
+                    [
+                        'and',
+                        ['=', 'product_id', $this->product_id],
+                        ['!=', 'id', $this->id],
+                    ]
+                );
+            }
+        }
     }
 }
