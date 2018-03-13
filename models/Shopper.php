@@ -38,7 +38,7 @@ class Shopper extends Core
             parent::scenarios(),
             [
                 'create' => [
-                    'web_info', 'fraud_info', 'shopper_info', 'user_id', 'wallet_id', 'shopper_id'
+                    'web_info', 'fraud_info', 'shopper_info', 'user_id', 'wallet_id'
                 ],
                 'get' => [
                     'shopper_info', 'user_id', 'wallet_id', 'shopper_id'
