@@ -19,6 +19,7 @@ class Xml extends \yii\base\Model
      */
     public static function prepareBody($wrapBy, $data, $firstLevel = true, $ignore = Xml::DEFAULT_IGNORE)
     {
+        $wrapBy = str_replace('_', '-', $wrapBy);
         if ($firstLevel) {
             $result = "<$wrapBy xmlns='http://ws.plimus.com'>";
         } else {
@@ -26,12 +27,12 @@ class Xml extends \yii\base\Model
         }
         $result = empty($wrapBy) ? '' : $result;
         foreach ($data as $fieldName => $value) {
+            if (in_array($fieldName, $ignore) || empty($value)) {
+                continue;
+            }
             $fieldName = str_replace('_', '-', $fieldName);
             if (is_numeric($fieldName)) {
                 $fieldName = key($data[$fieldName]);
-            }
-            if (in_array($fieldName, $ignore) || empty($value)) {
-                continue;
             }
             if (is_array($value)) {
                 $result .= Xml::prepareBody($fieldName == $wrapBy ? '' : $fieldName, $value, false);
