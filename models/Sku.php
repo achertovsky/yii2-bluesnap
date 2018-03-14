@@ -334,6 +334,8 @@ class Sku extends Core
                     ]
                 );
             }
+            return true;
         }
+        return false;
     }
 }
