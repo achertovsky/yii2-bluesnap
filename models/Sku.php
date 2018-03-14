@@ -94,6 +94,12 @@ class Sku extends Core
     }
 
     /**
+     * Amount of recursive calls in case of general error
+     * @var int 
+     */
+    public $getDepth = 0;
+    
+    /**
      * Receives SKU object and saves it to db
      * Docs: https://developers.bluesnap.com/v8976-Extended/docs/retrieve-sku
      * @return Sku
@@ -108,10 +114,18 @@ class Sku extends Core
             ]
         )->getContent();
         $response = Xml::parse($content);
+        if (isset($response['messages']['message']['code']) === 10000 && $this->getDepth < 10) {
+            $this->getDepth++;
+            return $this->getSku();
+        } else {
+            return null;
+        }
         $this->setAttributes($response['catalog_sku']);
         if ($this->save()) {
+            $this->getDepth = 0;
             return $this;
         }
+        $this->getDepth = 0;
         return null;
     }
     
