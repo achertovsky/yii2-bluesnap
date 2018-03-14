@@ -117,7 +117,7 @@ class Sku extends Core
         if (isset($response['messages']['message']['code']) === 10000 && $this->getDepth < 10) {
             $this->getDepth++;
             return $this->getSku();
-        } else {
+        } elseif ($this->getDepth >= 10) {
             return null;
         }
         $this->setAttributes($response['catalog_sku']);
