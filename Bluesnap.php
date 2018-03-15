@@ -9,6 +9,7 @@ use achertovsky\bluesnap\models\Sku;
 use achertovsky\bluesnap\models\Shopper;
 use achertovsky\bluesnap\models\Encrypt;
 use achertovsky\bluesnap\models\Cart;
+use achertovsky\bluesnap\helpers\IPN;
 
 /**
  * Component contains all required actions
@@ -36,36 +37,63 @@ class Bluesnap extends \yii\base\Object
      * Alias for getCommon
      * @param array $where
      * @param string $indexBy
+     * @param bool $single
+     * Return one item or array (by default array)
      * @return Product
-     * Array of Product
+     * Array of Product or object
      */
-    public function getProductModel($where = [], $indexBy = 'product_id')
+    public function getProductModel($where = [], $indexBy = 'product_id', $single = false)
     {
-        return $this->getCommon(Product::className(), $where, $indexBy);
+        $array = $this->getCommon(Product::className(), $where, $indexBy);
+        if ($single) {
+            if (empty($array)) {
+                return null;
+            }
+            return reset($array);
+        }
+        return $array;
     }
     
     /**
      * Alias for getCommon
      * @param array $where
      * @param string $indexBy
+     * @param bool $single
+     * Return one item or array (by default array)
      * @return Sku
-     * Array of Sku
+     * Array of Sku or object
      */
-    public function getSkuModel($where = [], $indexBy = 'product_id')
+    public function getSkuModel($where = [], $indexBy = 'product_id', $single = false)
     {
-        return $this->getCommon(Sku::className(), $where, $indexBy);
+        $array = $this->getCommon(Sku::className(), $where, $indexBy);
+        if ($single) {
+            if (empty($array)) {
+                return null;
+            }
+            return reset($array);
+        }
+        return $array;
     }
     
     /**
      * Alias for getCommon
      * @param array $where
      * @param string $indexBy
+     * @param bool $single
+     * Return one item or array (by default array)
      * @return Shopper
-     * Array of Shopper
+     * Array of Shopper or object
      */
-    public function getShopperModel($where = [], $indexBy = 'id')
+    public function getShopperModel($where = [], $indexBy = 'id', $single = false)
     {
-        return $this->getCommon(Shopper::className(), $where, $indexBy);
+        $array = $this->getCommon(Shopper::className(), $where, $indexBy);
+        if ($single) {
+            if (empty($array)) {
+                return null;
+            }
+            return reset($array);
+        }
+        return $array;
     }
     
     /**
@@ -141,5 +169,17 @@ class Bluesnap extends \yii\base\Object
         $cart->module = Yii::$app->getModule($this->moduleName);
         $cart->setUrl();
         return $cart;
+    }
+    
+    /**
+     * Alias for IPN::handleIpn
+     * @return mixed
+     */
+    public function handleIpn()
+    {
+        $ipn = new IPN;
+        $ipn->module = Yii::$app->getModule($this->moduleName);
+        $ipn->setIps();
+        return $ipn->handleIpn();
     }
 }
