@@ -6,6 +6,7 @@ use Yii;
 use achertovsky\bluesnap\models\Core;
 use achertovsky\bluesnap\models\Shopper;
 use achertovsky\bluesnap\models\Sku;
+use achertovsky\bluesnap\models\Product;
 
 /**
  * This is the model class for table "bluesnap_cart".
@@ -17,9 +18,11 @@ use achertovsky\bluesnap\models\Sku;
  * @property integer $sku_id
  * @property integer $status
  * @property integer $quantity
+ * @property integer $product_id
  *
  * @property Shopper $shopper
  * @property Sku $sku
+ * @property Product $product
  */
 class Order extends Core
 {
@@ -30,16 +33,23 @@ class Order extends Core
     {
         return 'bluesnap_order';
     }
-
+    
+    /**
+     * List of possible status codes
+     */
+    const STATUS_CREATED = 0;
+    
     /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
-            [['created_at', 'updated_at', 'shopper_id', 'sku_id', 'status', 'quantity'], 'integer'],
+            [['status'], 'required'],
+            [['created_at', 'updated_at', 'shopper_id', 'sku_id', 'status', 'quantity', 'product_id'], 'integer'],
             [['shopper_id'], 'exist', 'skipOnError' => false, 'targetClass' => Shopper::className(), 'targetAttribute' => ['shopper_id' => 'shopper_id']],
             [['sku_id'], 'exist', 'skipOnError' => false, 'targetClass' => Sku::className(), 'targetAttribute' => ['sku_id' => 'sku_id']],
+            [['product_id'], 'exist', 'skipOnError' => false, 'targetClass' => Sku::className(), 'targetAttribute' => ['product_id' => 'product_id']],
         ];
     }
 
@@ -48,7 +58,7 @@ class Order extends Core
      */
     public function getShopper()
     {
-        return $this->hasOne(BluesnapShopper::className(), ['shopper_id' => 'shopper_id']);
+        return $this->hasOne(Shopper::className(), ['shopper_id' => 'shopper_id']);
     }
 
     /**
@@ -56,6 +66,14 @@ class Order extends Core
      */
     public function getSku()
     {
-        return $this->hasOne(BluesnapSku::className(), ['sku_id' => 'sku_id']);
+        return $this->hasOne(Sku::className(), ['sku_id' => 'sku_id']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProduct()
+    {
+        return $this->hasOne(Product::className(), ['product_id' => 'product_id']);
     }
 }

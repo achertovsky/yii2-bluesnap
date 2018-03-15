@@ -59,12 +59,18 @@ class Cart
         $skuIds = [];
         foreach ($this->data as $value) {
             $order = new Order();
+            $productId = Sku::find()->where(
+                [
+                    'sku_id' => $value['sku_id']
+                ]
+            )->select('product_id')->scalar();
             $order->setAttributes(
                 [
                     'sku_id' => $value['sku_id'],
                     'quantity' => $value['quantity'],
                     'shopper_id' => $shopperId,
                     'status' => Order::STATUS_CREATED,
+                    'product_id' => $productId,
                 ]
             );
             $parameters["sku{$value['sku_id']}"] = $value['quantity'];
