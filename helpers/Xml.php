@@ -27,7 +27,9 @@ class Xml extends \yii\base\Model
         }
         $result = empty($wrapBy) ? '' : $result;
         foreach ($data as $fieldName => $value) {
-            if (in_array($fieldName, $ignore) || empty($value)) {
+            $emptyVal = empty($value);
+            $inArray = in_array($fieldName, $ignore, true);
+            if ($inArray || $emptyVal) {
                 continue;
             }
             $fieldName = str_replace('_', '-', $fieldName);
@@ -35,7 +37,7 @@ class Xml extends \yii\base\Model
                 $fieldName = key($data[$fieldName]);
             }
             if (is_array($value)) {
-                $result .= Xml::prepareBody($fieldName == $wrapBy ? '' : $fieldName, $value, false);
+                $result .= Xml::prepareBody(($fieldName == $wrapBy ? '' : $fieldName), $value, false, $ignore);
                 continue;
             }
             if (is_bool($value)) {
