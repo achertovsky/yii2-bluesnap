@@ -352,4 +352,26 @@ class Sku extends Core
         }
         return false;
     }
+    
+    /**
+     * On every update/create make sure that sku ipn enabled
+     * @var array
+     */
+    public $sku_ipn_settings = [
+        'use_seller_level_settings' => true,
+    ];
+    
+    /**
+     * Also attach custom attributes
+     * @inheritdoc
+     */
+    public function attributes()
+    {
+        return ArrayHelper::merge(
+            parent::attributes(),
+            [
+                'sku_ipn_settings',
+            ]
+        );
+    }
 }
