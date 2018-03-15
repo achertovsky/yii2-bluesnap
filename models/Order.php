@@ -38,6 +38,8 @@ class Order extends Core
      * List of possible status codes
      */
     const STATUS_CREATED = 0;
+    const STATUS_COMPLETED = 1;
+    const STATUS_CANCELLED = 2;
     
     /**
      * @inheritdoc
