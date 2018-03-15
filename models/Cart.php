@@ -64,6 +64,7 @@ class Cart
                     'sku_id' => $value['sku_id'],
                     'quantity' => $value['quantity'],
                     'shopper_id' => $shopperId,
+                    'status' => Order::STATUS_CREATED,
                 ]
             );
             $parameters["sku{$value['sku_id']}"] = $value['quantity'];
