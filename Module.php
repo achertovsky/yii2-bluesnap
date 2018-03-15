@@ -20,6 +20,7 @@ class Module extends \yii\base\Module
     public $authToken = '';
     public $antiFraudSalt = '';
     public $sellerId = '';
+    public $dataProtectionKey = '';
     
     /**
      * Number of minutes that the pre-populated checkout page will be available; maximum is 1440 minutes (i.e. 24 hours)

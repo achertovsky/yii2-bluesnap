@@ -30,6 +30,7 @@ return [
             // 'authToken' => $encodedString;
             'antiFraudSalt' => 'some word/phrase/anything that u want to use. it gonna be used to generate anti-fraud token. make sure only u and trusted people know it :)',
             'sellerId' => 'fillme',
+            'dataProtectionKey' => 'fillme', //set it only if you want to use "Require Notification Receipt". Otherwise it wont be used
         ],
     ],
     'components' => [
