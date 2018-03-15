@@ -237,7 +237,9 @@ class Product extends Core
             $location = $product->product_skus['url'];
             $sku->sku_id = substr($location, strrpos($location, '/')+1);
             $sku->default = true;
-            $sku->getSku();
+            if ($sku->getSku()) {
+                $sku->updateSku();
+            }
         }
     }
     

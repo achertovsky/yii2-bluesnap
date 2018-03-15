@@ -114,7 +114,10 @@ class Sku extends Core
             ]
         )->getContent();
         $response = Xml::parse($content);
-        if (isset($response['messages']['message']['code']) === 10000 && $this->getDepth < 10) {
+        if (isset($response['messages']['message']['code']) &&
+            $response['messages']['message']['code'] == 10000 &&
+            $this->getDepth < 10
+        ) {
             $this->getDepth++;
             return $this->getSku();
         } elseif ($this->getDepth >= 10) {
