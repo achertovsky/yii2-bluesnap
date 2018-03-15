@@ -15,7 +15,7 @@ use achertovsky\bluesnap\models\Sku;
  * @property integer $id
  * @property integer $created_at
  * @property integer $updated_at
- * @property integer $contract_name
+ * @property string $contract_name
  * @property integer $product_id
  * @property string $sku_status
  * @property string $sku_type
