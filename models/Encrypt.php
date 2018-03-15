@@ -26,6 +26,9 @@ class Encrypt
     {
         $parameters = [];
         foreach ($params as $key => $value) {
+            if ($key == 'thankyou.backtosellerurl') {
+                $value = urlencode($value);
+            }
             $parameters['parameters'][] = [
                 'parameter' => [
                     'param-key' => $key,
