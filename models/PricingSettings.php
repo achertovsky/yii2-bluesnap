@@ -4,11 +4,12 @@ namespace achertovsky\bluesnap\models;
 
 use achertovsky\bluesnap\models\ChargePolicy;
 use achertovsky\bluesnap\traits\Common;
+use yii\base\Model;
 
 /**
  * @author alexander
  */
-class PricingSettings
+class PricingSettings extends Model
 {
     use Common;
     /**
@@ -187,5 +188,32 @@ class PricingSettings
         $this->setRecurringPlanSettings();
         $this->charge_policy = $chargePolicy->getData();
         return $this->getData();
+    }
+    
+    /**
+     * @return numeric
+     */
+    public function getPrice()
+    {
+        $chargePolicy = new ChargePolicy($this->charge_policy);
+        return $chargePolicy->getPrice();
+    }
+    
+    /**
+     * @return string
+     */
+    public function getCurrency()
+    {
+        $chargePolicy = new ChargePolicy($this->charge_policy);
+        return $chargePolicy->getCurrency();
+    }
+    
+    /**
+     * @return string
+     */
+    public function getPeriodFrequency()
+    {
+        $chargePolicy = new ChargePolicy($this->charge_policy);
+        return $chargePolicy->getPeriodFrequency();
     }
 }

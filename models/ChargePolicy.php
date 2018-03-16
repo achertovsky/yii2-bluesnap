@@ -3,10 +3,12 @@
 namespace achertovsky\bluesnap\models;
 
 use achertovsky\bluesnap\traits\Common;
+use yii\base\Model;
+
 /**
  * @author alexander
  */
-class ChargePolicy
+class ChargePolicy extends Model
 {
     use Common;
     /** @var array */
@@ -97,5 +99,56 @@ class ChargePolicy
             ],
             'period_frequency' => $periodFrequency,
         ];
+    }
+    
+    /**
+     * @return array
+     */
+    public function getActiveType()
+    {
+        foreach ($this->getData() as $key => $value) {
+            if (empty($value)) {
+                continue;
+            }
+            return $value;
+        }
+    }
+    
+    /**
+     * @return array
+     */
+    public function getCatalogPrice()
+    {
+        $type = $this->getActiveType();
+        return isset($type['catalog_prices']['catalog_price']) ?
+            $type['catalog_prices']['catalog_price'] : [];
+    }
+    
+    /**
+     * @return numeric
+     */
+    public function getPrice()
+    {
+        $catalogPrice = $this->getCatalogPrice();
+        return isset($catalogPrice['amount']) ? $catalogPrice['amount'] : 0;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getCurrency()
+    {
+        $catalogPrice = $this->getCatalogPrice();
+        return isset($catalogPrice['currency']) ? $catalogPrice['currency'] : '';
+    }
+    
+    /**
+     * @return string
+     */
+    public function getPeriodFrequency()
+    {
+        $type = $this->getActiveType();
+        return isset($type['period_frequency']) ?
+            $type['period_frequency'] : '';
     }
 }
