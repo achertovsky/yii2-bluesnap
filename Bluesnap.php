@@ -39,8 +39,7 @@ class Bluesnap extends \yii\base\Object
      * @param string $indexBy
      * @param bool $single
      * Return one item or array (by default array)
-     * @return Product
-     * Array of Product or object
+     * @return Product[]|Product
      */
     public function getProductModel($where = [], $indexBy = 'product_id', $single = false)
     {
@@ -60,8 +59,7 @@ class Bluesnap extends \yii\base\Object
      * @param string $indexBy
      * @param bool $single
      * Return one item or array (by default array)
-     * @return Sku
-     * Array of Sku or object
+     * @return Sku[]|Sku
      */
     public function getSkuModel($where = [], $indexBy = 'product_id', $single = false)
     {
@@ -81,8 +79,7 @@ class Bluesnap extends \yii\base\Object
      * @param string $indexBy
      * @param bool $single
      * Return one item or array (by default array)
-     * @return Shopper
-     * Array of Shopper or object
+     * @return Shopper[]|Shopper
      */
     public function getShopperModel($where = [], $indexBy = 'id', $single = false)
     {
