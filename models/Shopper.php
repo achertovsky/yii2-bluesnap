@@ -9,7 +9,6 @@ use yii\helpers\ArrayHelper;
 use achertovsky\bluesnap\helpers\Xml;
 use achertovsky\bluesnap\helpers\Request;
 use yii\db\ActiveRecord;
-use yii\base\Event;
 
 /**
  * This is the model class for table "bluesnap_shopper".
@@ -235,27 +234,5 @@ class Shopper extends Core
             return true;
         }
         return false;
-    }
-    
-    /**
-     * List of eveents
-     */
-    const EVENT_SHOPPER_CREATED = 'bluesnap_shopper_created';
-    const EVENT_SHOPPER_UPDATED = 'bluesnap_shopper_updated';
-    
-    /**
-     * Events triggering
-     * @inheritdoc
-     */
-    public function afterSave($insert, $changedAttributes)
-    {
-        parent::afterSave($insert, $changedAttributes);
-        $event = new Event();
-        $event->sender = $this;
-        if ($insert) {
-            Event::trigger($this->className(), self::EVENT_SHOPPER_CREATED, $event);
-        } else {
-            Event::trigger($this->className(), self::EVENT_SHOPPER_UPDATED, $event);
-        }
     }
 }
