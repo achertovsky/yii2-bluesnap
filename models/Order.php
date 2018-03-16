@@ -7,6 +7,7 @@ use achertovsky\bluesnap\models\Core;
 use achertovsky\bluesnap\models\Shopper;
 use achertovsky\bluesnap\models\Sku;
 use achertovsky\bluesnap\models\Product;
+use yii\base\Event;
 
 /**
  * This is the model class for table "bluesnap_cart".
@@ -77,5 +78,27 @@ class Order extends Core
     public function getProduct()
     {
         return $this->hasOne(Product::className(), ['product_id' => 'product_id']);
+    }
+    
+    /**
+     * List of eveents
+     */
+    const EVENT_ORDER_CREATED = 'bluesnap_order_created';
+    const EVENT_ORDER_UPDATED = 'bluesnap_order_updated';
+    
+    /**
+     * Events triggering
+     * @inheritdoc
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+        $event = new Event();
+        $event->sender = $this;
+        if ($insert) {
+            Event::trigger($this->className(), self::EVENT_ORDER_CREATED, $event);
+        } else {
+            Event::trigger($this->className(), self::EVENT_ORDER_UPDATED, $event);
+        }
     }
 }
