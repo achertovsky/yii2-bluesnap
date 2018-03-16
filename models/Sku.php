@@ -241,6 +241,7 @@ class Sku extends Core
         $this->sku_type = $type;
         $this->scenario = 'create';
         if (!$this->validate()) {
+            Yii::error("Validation error(s):".var_export($this->getErrors(), true));
             return false;
         }
         $this->scenario = 'default';
@@ -254,6 +255,10 @@ class Sku extends Core
             ]
         );
         $code = $response->getStatusCode();
+        $possibleErrors = Xml::parse($response->getContent());
+        if (!empty($possibleErrors)) {
+            Yii::error("Error occured on creation:".var_export($possibleErrors, true));
+        }
         //docs says 201 - success
         if ($code == 201) {
             //get sku id from response
@@ -376,5 +381,14 @@ class Sku extends Core
                 'sku_ipn_settings',
             ]
         );
+    }
+    
+    /**
+     * @return \achertovsky\bluesnap\models\PricingSettings
+     */
+    public function getPricingSettings()
+    {
+        $pricingSettings = new PricingSettings($this->pricing_settings);
+        return $pricingSettings;
     }
 }
