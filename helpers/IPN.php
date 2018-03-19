@@ -92,6 +92,12 @@ class IPN
                 case "AUTH_ONLY":
                     $this->handleAuth($post);
                     break;
+                case "CANCELLATION":
+                    $this->handleCancel($post);
+                    break;
+                case "DECLINE":
+                    $this->handleCancel($post);
+                    break;
             }
         }
         
@@ -100,11 +106,14 @@ class IPN
         Yii::$app->response->content = md5("OK$dataProtectionKey");
     }
     
-    public function handleCharge($post)
+    /**
+     * @param array $post
+     * @return Order
+     */
+    public function findOrder($post)
     {
         $shopperId = $post['accountId'];
         $productId = $post['productId'];
-        $quantity = $post['quantity'];
         $skuId = $post['contractId'];
         $order = Order::find()->where(
             [
@@ -112,18 +121,55 @@ class IPN
                 ['=', 'shopper_id', $shopperId],
                 ['=', 'sku_id', $skuId],
                 ['=', 'product_id', $productId],
-                ['=', 'status', Order::STATUS_CREATED],
             ]
         )->one();
         if (empty($order)) {
-            Yii::error("No such order exist shopper_id: $shopperId; sku_id: $productId");
-            return;
+            Yii::error("No such order exist shopper_id: $shopperId; product_id: $productId");
+        } else {
+            $order->quantity = $post['quantity'];
         }
-        $order->quantity = $quantity;
+        return $order;
     }
     
+    /**
+     * @param array $post
+     * @return bool
+     */
+    public function handleCharge($post)
+    {
+        $order = self::findOrder($post);
+        if (empty($order)) {
+            return;
+        }
+        $order->status = Order::STATUS_COMPLETED;
+        return $order->save();
+    }
+    
+    /**
+     * @param array $post
+     * @return bool
+     */
     public function handleAuth($post)
     {
-        
+        $order = self::findOrder($post);
+        if (empty($order)) {
+            return;
+        }
+        $order->status = Order::STATUS_AUTH_ONLY;
+        return $order->save();
+    }
+    
+    /**
+     * @param array $post
+     * @return bool
+     */
+    public function handleCancel($post)
+    {
+        $order = self::findOrder($post);
+        if (empty($order)) {
+            return;
+        }
+        $order->status = Order::STATUS_CANCELLED;
+        return $order->save();
     }
 }
