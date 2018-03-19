@@ -90,7 +90,7 @@ class IPN
                     $this->handleCharge($post);
                     break;
                 case "AUTH_ONLY":
-                    $this->handleAuth($post);
+                    $this->handleCharge($post);
                     break;
                 case "CANCELLATION":
                     $this->handleCancel($post);
@@ -142,20 +142,6 @@ class IPN
             return;
         }
         $order->status = Order::STATUS_COMPLETED;
-        return $order->save();
-    }
-    
-    /**
-     * @param array $post
-     * @return bool
-     */
-    public function handleAuth($post)
-    {
-        $order = self::findOrder($post);
-        if (empty($order)) {
-            return;
-        }
-        $order->status = Order::STATUS_AUTH_ONLY;
         return $order->save();
     }
     

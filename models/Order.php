@@ -40,7 +40,6 @@ class Order extends Core
     const STATUS_CREATED = 0;
     const STATUS_COMPLETED = 1;
     const STATUS_CANCELLED = 2;
-    const STATUS_AUTH_ONLY = 3;
     
     /**
      * @inheritdoc
