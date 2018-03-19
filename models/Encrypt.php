@@ -57,6 +57,7 @@ class Encrypt
                 Yii::error($data['messages']['message']['error_name']." ".$data['messages']['message']['description']);
             }
         }
+        throw new Exception(var_export($content, true));
         return null;
     }
     
@@ -86,6 +87,7 @@ class Encrypt
                 return $result;
             }
         }
+        throw new Exception(var_export($content, true));
         return null;
     }
 }
