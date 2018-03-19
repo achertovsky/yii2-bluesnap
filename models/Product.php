@@ -131,6 +131,8 @@ class Product extends Core
                 return $this;
             }
         }
+        $content = Xml::parse($response->getContent());
+        Yii::error(var_export($content, true));
         
         return false;
     }
@@ -157,9 +159,9 @@ class Product extends Core
         $code = $response->getStatusCode();
         //docs says 204 - success
         if ($code == 204) {
-           if ($this->save()) {
-            return $this;
-        } 
+            if ($this->save()) {
+                return $this;
+            } 
         }
         return false;
     }
