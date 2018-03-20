@@ -141,6 +141,9 @@ class IPN
         if (empty($order)) {
             return;
         }
+        if (isset($post['subscriptionId'])) {
+            $order->subscription_id = $post['subscriptionId'];
+        }
         $order->status = Order::STATUS_COMPLETED;
         return $order->save();
     }

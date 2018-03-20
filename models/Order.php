@@ -19,6 +19,7 @@ use achertovsky\bluesnap\models\Product;
  * @property integer $status
  * @property integer $quantity
  * @property integer $product_id
+ * @property integer $subscription_id
  *
  * @property Shopper $shopper
  * @property Sku $sku
@@ -48,7 +49,7 @@ class Order extends Core
     {
         return [
             [['status'], 'required'],
-            [['created_at', 'updated_at', 'shopper_id', 'sku_id', 'status', 'quantity', 'product_id'], 'integer'],
+            [['created_at', 'updated_at', 'shopper_id', 'sku_id', 'status', 'quantity', 'product_id', 'subscription_id'], 'integer'],
             [['shopper_id'], 'exist', 'skipOnError' => false, 'targetClass' => Shopper::className(), 'targetAttribute' => ['shopper_id' => 'shopper_id']],
             [['sku_id'], 'exist', 'skipOnError' => false, 'targetClass' => Sku::className(), 'targetAttribute' => ['sku_id' => 'sku_id']],
             [['product_id'], 'exist', 'skipOnError' => false, 'targetClass' => Sku::className(), 'targetAttribute' => ['product_id' => 'product_id']],

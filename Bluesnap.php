@@ -10,6 +10,7 @@ use achertovsky\bluesnap\models\Shopper;
 use achertovsky\bluesnap\models\Encrypt;
 use achertovsky\bluesnap\models\Cart;
 use achertovsky\bluesnap\helpers\IPN;
+use achertovsky\bluesnap\models\Order;
 
 /**
  * Component contains all required actions
@@ -178,5 +179,25 @@ class Bluesnap extends \yii\base\Object
         $ipn->module = Yii::$app->getModule($this->moduleName);
         $ipn->setIps();
         return $ipn->handleIpn();
+    }
+    
+    /**
+     * Alias for getCommon
+     * @param array $where
+     * @param string $indexBy
+     * @param bool $single
+     * Return one item or array (by default array)
+     * @return Order[]|Order
+     */
+    public function getOrderModel($where = [], $indexBy = 'id', $single = false)
+    {
+        $array = $this->getCommon(Order::className(), $where, $indexBy);
+        if ($single) {
+            if (empty($array)) {
+                return null;
+            }
+            return reset($array);
+        }
+        return $array;
     }
 }

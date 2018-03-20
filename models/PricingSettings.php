@@ -216,4 +216,24 @@ class PricingSettings extends Model
         $chargePolicy = new ChargePolicy($this->charge_policy);
         return $chargePolicy->getPeriodFrequency();
     }
+    
+    /**
+     * @param string $type
+     * @return boolean
+     */
+    public static function isSubscription($type)
+    {
+        if (in_array(
+                $type,
+                [
+                    self::POLICY_TYPE_STANDARD_SUBSCRIPTION,
+                    self::POLICY_TYPE_STANDARD_SUBSCRIPTION_WITH_INITIAL_CHARGE,
+                    self::POLICY_TYPE_STANDARD_SUBSCRIPTION_WITH_TRIAL
+                ]
+            )
+        ) {
+            return true;
+        }
+        return false;
+    }
 }
