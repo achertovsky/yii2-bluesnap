@@ -11,6 +11,7 @@ namespace achertovsky\bluesnap\helpers;
 use achertovsky\bluesnap\traits\Common;
 use achertovsky\bluesnap\models\Order;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * Docs https://support.bluesnap.com/docs/ipn-setup
@@ -108,21 +109,24 @@ class IPN
     
     /**
      * @param array $post
+     * @param array $whereAdditions
      * @return Order
      */
-    public function findOrder($post)
+    public function findOrder($post, $whereAdditions = [])
     {
         $shopperId = $post['accountId'];
         $productId = $post['productId'];
         $skuId = $post['contractId'];
-        $order = Order::find()->where(
-            [
-                'and',
-                ['=', 'shopper_id', $shopperId],
-                ['=', 'sku_id', $skuId],
-                ['=', 'product_id', $productId],
-            ]
-        )->one();
+        $where = [
+            'and',
+            ['=', 'shopper_id', $shopperId],
+            ['=', 'sku_id', $skuId],
+            ['=', 'product_id', $productId],
+        ];
+        if (!empty($whereAdditions)) {
+            $where = ArrayHelper::merge($where, $whereAdditions);
+        }
+        $order = Order::find()->where($where)->orderBy('id desc')->one();
         if (empty($order)) {
             Yii::error("No such order exist shopper_id: $shopperId; product_id: $productId");
         } else {
@@ -154,7 +158,11 @@ class IPN
      */
     public function handleCancel($post)
     {
-        $order = self::findOrder($post);
+        $where = [];
+        if ($post['subscriptionId']) {
+            $where = ['=', 'subscription_id', $post['subscriptionId']];
+        }
+        $order = self::findOrder($post, $where);
         if (empty($order)) {
             return;
         }
