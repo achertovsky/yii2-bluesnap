@@ -193,9 +193,10 @@ class Sku extends Core
     /**
      * Updates SKU
      * Docs: https://developers.bluesnap.com/v8976-Extended/docs/update-sku
+     * @param bool $save
      * @return boolean|\achertovsky\bluesnap\models\Sku
      */
-    public function updateSku()
+    public function updateSku($save = true)
     {
         if (!$this->validate()) {
             return false;
@@ -212,6 +213,9 @@ class Sku extends Core
         $code = $response->getStatusCode();
         //docs says 204 - success
         if ($code == 204) {
+            if (!$save) {
+                return $this;
+            }
             if ($this->save()) {
                 return $this;
             } 
@@ -222,12 +226,22 @@ class Sku extends Core
     /**
      * Deletes SKU
      * Docs: https://developers.bluesnap.com/v8976-Extended/docs/update-sku
+     * @param bool $fromDb
      * @return boolean|\achertovsky\bluesnap\models\Sku
      */
-    public function deleteSku()
+    public function deleteSku($fromDb = false)
     {
         $this->sku_status = self::SKU_STATUS_DELETED;
-        return $this->updateSku();
+        $sku = $this->updateSku(false);
+        if (empty($sku)) {
+            return $sku;
+        }
+        if ($fromDb) {
+            $sku->delete();
+        } else {
+            $sku->save();
+        }
+        return $sku;
     }
     
     /**
