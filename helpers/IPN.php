@@ -124,7 +124,7 @@ class IPN extends \yii\base\Object
                     $this->handleCancel();
                     break;
             }
-            Event::trigger(IPN::className(), $this->post['transactionType'], ['sender' => $this]);
+            Event::trigger(IPN::className(), $this->post['transactionType'], new Event(['sender' => $this]));
         }
         
         $dataProtectionKey = Yii::$app->getModule(Yii::$app->bluesnap->moduleName)->dataProtectionKey;
