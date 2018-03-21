@@ -12,6 +12,7 @@ use achertovsky\bluesnap\traits\Common;
 use achertovsky\bluesnap\models\Order;
 use Yii;
 use yii\helpers\ArrayHelper;
+use yii\base\Event;
 
 /**
  * Docs https://support.bluesnap.com/docs/ipn-setup
@@ -20,7 +21,7 @@ use yii\helpers\ArrayHelper;
  * @parameter array $sandboxIps
  * @parameter array $productionIps
  */
-class IPN
+class IPN extends \yii\base\Object
 {
     use Common;
     /**
@@ -74,6 +75,29 @@ class IPN
     }
     
     /**
+     * List of available events (by default contain list of only default ipns)
+     * Docs: https://support.bluesnap.com/docs/default-ipns
+     */
+    const EVENT_AUTH_ONLY = "AUTH_ONLY";
+    const EVENT_CANCELLATION = "CANCELLATION";
+    const EVENT_CANCELLATION_REFUND = "CANCELLATION_REFUND";
+    const EVENT_CANCEL_ON_RENEWAL = "CANCEL_ON_RENEWAL";
+    const EVENT_CHARGE = "CHARGE";
+    const EVENT_CHARGEBACK = "CHARGEBACK";
+    const EVENT_CHARGEBACK_STATUS_CHANGED = "CHARGEBACK_STATUS_CHANGED";
+    const EVENT_CONTRACT_CHANGE = "CONTRACT_CHANGE";
+    const EVENT_DECLINE = "DECLINE";
+    const EVENT_RECURRING = "RECURRING";
+    const EVENT_REFUND = "REFUND";
+    const EVENT_SUBSCRIPTION_REMINDER = "SUBSCRIPTION_REMINDER";
+    
+    /**
+     * Contains all post request of IPN
+     * @var array
+     */
+    public $post = [];
+    
+    /**
      * Main enter point of IPN
      * Contains all supported types and correct response to bluesnap
      */
@@ -83,23 +107,24 @@ class IPN
             Yii::info("Wrong ip");
             throw new \yii\web\NotFoundHttpException;
         }
-        $post = Yii::$app->request->post();
-        Yii::info("Got: ".var_export($post, true));
-        if (isset($post['transactionType'])) {
-            switch ($post['transactionType']) {
+        $this->post = Yii::$app->request->post();
+        Yii::info("Got: ".var_export($this->post, true));
+        if (isset($this->post['transactionType'])) {
+            switch ($this->post['transactionType']) {
                 case "CHARGE":
-                    $this->handleCharge($post);
+                    $this->handleCharge();
                     break;
                 case "AUTH_ONLY":
-                    $this->handleCharge($post);
+                    $this->handleCharge();
                     break;
                 case "CANCELLATION":
-                    $this->handleCancel($post);
+                    $this->handleCancel();
                     break;
                 case "DECLINE":
-                    $this->handleCancel($post);
+                    $this->handleCancel();
                     break;
             }
+            Event::trigger(IPN::className(), $this->post['transactionType'], ['sender' => $this]);
         }
         
         $dataProtectionKey = Yii::$app->getModule(Yii::$app->bluesnap->moduleName)->dataProtectionKey;
@@ -136,33 +161,31 @@ class IPN
     }
     
     /**
-     * @param array $post
      * @return bool
      */
-    public function handleCharge($post)
+    public function handleCharge()
     {
-        $order = self::findOrder($post);
+        $order = self::findOrder($this->post);
         if (empty($order)) {
             return;
         }
-        if (isset($post['subscriptionId'])) {
-            $order->subscription_id = $post['subscriptionId'];
+        if (isset($this->post['subscriptionId'])) {
+            $order->subscription_id = $this->post['subscriptionId'];
         }
         $order->status = Order::STATUS_COMPLETED;
         return $order->save();
     }
     
     /**
-     * @param array $post
      * @return bool
      */
-    public function handleCancel($post)
+    public function handleCancel()
     {
         $where = [];
-        if ($post['subscriptionId']) {
-            $where = ['=', 'subscription_id', $post['subscriptionId']];
+        if ($this->post['subscriptionId']) {
+            $where = [['=', 'subscription_id', $this->post['subscriptionId']]];
         }
-        $order = self::findOrder($post, $where);
+        $order = self::findOrder($this->post, $where);
         if (empty($order)) {
             return;
         }
