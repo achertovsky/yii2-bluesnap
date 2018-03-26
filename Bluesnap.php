@@ -11,6 +11,7 @@ use achertovsky\bluesnap\models\Encrypt;
 use achertovsky\bluesnap\models\Cart;
 use achertovsky\bluesnap\helpers\IPN;
 use achertovsky\bluesnap\models\Order;
+use achertovsky\bluesnap\models\Subscription;
 
 /**
  * Component contains all required actions
@@ -101,18 +102,22 @@ class Bluesnap extends \yii\base\Object
      * @param string $indexBy
      * @return array of $className
      */
-    public function getCommon($className, $where = [], $indexBy = 'product_id')
+    public function getCommon($className, $where = [], $indexBy = 'product_id', $doSetUrl = true)
     {
         if (empty($where)) {
             $model = new $className();
             $model->module = Yii::$app->getModule($this->moduleName);
-            $model->setUrl();
+            if ($doSetUrl) {
+                $model->setUrl();
+            }
             return $model;
         }
         $models = $className::find()->where($where)->indexBy($indexBy)->all();
         foreach ($models as $key => $model) {
             $model->module = Yii::$app->getModule($this->moduleName);
-            $model->setUrl();
+            if ($doSetUrl) {
+                $model->setUrl();
+            }
             $models[$key] = $model;
         }
         return $models;
@@ -191,7 +196,7 @@ class Bluesnap extends \yii\base\Object
      */
     public function getOrderModel($where = [], $indexBy = 'id', $single = false)
     {
-        $array = $this->getCommon(Order::className(), $where, $indexBy);
+        $array = $this->getCommon(Order::className(), $where, $indexBy, false);
         if ($single) {
             if (empty($array)) {
                 return null;
@@ -199,5 +204,16 @@ class Bluesnap extends \yii\base\Object
             return reset($array);
         }
         return $array;
+    }
+    
+    /**
+     * @return Subscription
+     */
+    public function getSubscriptionModel()
+    {
+        $subscription = new Subscription;
+        $subscription->module = Yii::$app->getModule($this->moduleName);
+        $subscription->setUrl();
+        return $subscription;
     }
 }

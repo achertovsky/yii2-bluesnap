@@ -7,6 +7,7 @@ use achertovsky\bluesnap\models\Core;
 use achertovsky\bluesnap\models\Shopper;
 use achertovsky\bluesnap\models\Sku;
 use achertovsky\bluesnap\models\Product;
+use achertovsky\bluesnap\models\Subscription;
 
 /**
  * This is the model class for table "bluesnap_cart".
@@ -78,5 +79,35 @@ class Order extends Core
     public function getProduct()
     {
         return $this->hasOne(Product::className(), ['product_id' => 'product_id']);
+    }
+    
+    /**
+     * @var Subscription
+     */
+    private $sub = null;
+    /**
+     * @return Subscription
+     */
+    public function getSubscription()
+    {
+        if (is_null($this->sub)) {
+            $this->sub = Yii::$app->bluesnap->subscriptionModel;
+        }
+        return $this->sub;
+    }
+    
+    /**
+     * 
+     * @param type $skuId
+     * @return boolean
+     */
+    public function changeContract($skuId)
+    {
+        if (empty($this->subscription_id)) {
+            return false;
+        }
+        /* @var $subscription Subscription */
+        $subscription = $this->subscription;
+        return $subscription->switchSubscriptionContract($this->subscription_id, $skuId, $this->shopper_id);
     }
 }
