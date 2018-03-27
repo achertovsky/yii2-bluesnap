@@ -117,6 +117,9 @@ class IPN extends \yii\base\Object
                 case "AUTH_ONLY":
                     $this->handleCharge();
                     break;
+                case "RECURRING":
+                    $this->handleCharge();
+                    break;
                 case "CANCELLATION":
                     $this->handleCancel();
                     break;
@@ -137,7 +140,7 @@ class IPN extends \yii\base\Object
      * @param array $whereAdditions
      * @return Order
      */
-    public function findOrder($post, $whereAdditions = [])
+    public function findOrder($post, $whereAdditions = [], $overrideWhere = false)
     {
         $shopperId = $post['accountId'];
         $productId = $post['productId'];
@@ -148,8 +151,10 @@ class IPN extends \yii\base\Object
             ['=', 'sku_id', $skuId],
             ['=', 'product_id', $productId],
         ];
-        if (!empty($whereAdditions)) {
+        if (!empty($whereAdditions) && !$overrideWhere) {
             $where = ArrayHelper::merge($where, $whereAdditions);
+        } elseif ($overrideWhere) {
+            $where = $whereAdditions;
         }
         $order = Order::find()->where($where)->orderBy('id desc')->one();
         if (empty($order)) {
@@ -167,7 +172,26 @@ class IPN extends \yii\base\Object
     {
         $order = self::findOrder($this->post);
         if (empty($order)) {
-            return;
+            //try to find order through subscription id
+            $shopperId = $this->post['accountId'];
+            $productId = $this->post['productId'];
+            $subscriptionId = $this->post['subscriptionId'];
+            $retryOrder = $order = self::findOrder(
+                $this->post,
+                [
+                    'and',
+                    ['=', 'product_id', $productId],
+                    ['=', 'shopper_id', $shopperId],
+                    ['=', 'subscription_id', $subscriptionId],
+                ],
+                true
+            );
+            if (empty($retryOrder)) {
+                return;
+            } else {
+                $order = $retryOrder;
+                $order->sku_id = $this->post['contractId'];
+            }
         }
         if (isset($this->post['subscriptionId'])) {
             $order->subscription_id = $this->post['subscriptionId'];
