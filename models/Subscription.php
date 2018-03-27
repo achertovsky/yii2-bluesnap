@@ -79,7 +79,8 @@ class Subscription extends \yii\base\Object
         if ($code == 204) {
             return true;
         }
-        $this->errors = Xml::parse($response->getContent());
+        $this->errors = $error = Xml::parse($response->getContent());
+        Yii::error(var_export($error, true));
         return false;
     }
 }
