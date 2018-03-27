@@ -5,6 +5,7 @@ namespace achertovsky\bluesnap\models;
 use achertovsky\bluesnap\helpers\Xml;
 use achertovsky\bluesnap\helpers\Request;
 use achertovsky\bluesnap\traits\Common;
+use Yii;
 
 /**
  * @author Alexander Chertovsky
