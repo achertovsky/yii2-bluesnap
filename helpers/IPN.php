@@ -158,7 +158,7 @@ class IPN extends \yii\base\Object
         }
         $order = Order::find()->where($where)->orderBy('id desc')->one();
         if (empty($order)) {
-            Yii::error("No such order exist shopper_id: $shopperId; product_id: $productId");
+            Yii::trace("No such order exist shopper_id: $shopperId; product_id: $productId; sku_id: ".$skuId);
         } else {
             $order->quantity = $post['quantity'];
         }
