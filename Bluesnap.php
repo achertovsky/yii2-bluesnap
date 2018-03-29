@@ -21,6 +21,13 @@ use achertovsky\bluesnap\models\Subscription;
 class Bluesnap extends \yii\base\Object
 {
     /**
+     * Gonna contain map to classes.
+     * If class empty - will use default
+     * @var array
+     */
+    public $modelMap = [];
+    
+    /**
      * Name of module. It should be identical to name in config `modules` section
      * @var string 
      */
@@ -45,7 +52,11 @@ class Bluesnap extends \yii\base\Object
      */
     public function getProductModel($where = [], $indexBy = 'product_id', $single = false)
     {
-        $array = $this->getCommon(Product::className(), $where, $indexBy);
+        $array = $this->getCommon(
+            isset($this->modelMap['product']) ? $this->modelMap['product'] : Product::className(),
+            $where,
+            $indexBy
+        );
         if ($single) {
             if (empty($array)) {
                 return null;
@@ -63,9 +74,13 @@ class Bluesnap extends \yii\base\Object
      * Return one item or array (by default array)
      * @return Sku[]|Sku
      */
-    public function getSkuModel($where = [], $indexBy = 'product_id', $single = false)
+    public function getSkuModel($where = [], $indexBy = 'sku_id', $single = false)
     {
-        $array = $this->getCommon(Sku::className(), $where, $indexBy);
+        $array = $this->getCommon(
+            isset($this->modelMap['sku']) ? $this->modelMap['sku'] : Sku::className(),
+            $where,
+            $indexBy
+        );
         if ($single) {
             if (empty($array)) {
                 return null;
@@ -85,7 +100,11 @@ class Bluesnap extends \yii\base\Object
      */
     public function getShopperModel($where = [], $indexBy = 'id', $single = false)
     {
-        $array = $this->getCommon(Shopper::className(), $where, $indexBy);
+        $array = $this->getCommon(
+            isset($this->modelMap['shopper']) ? $this->modelMap['shopper'] : Shopper::className(),
+            $where,
+            $indexBy
+        );
         if ($single) {
             if (empty($array)) {
                 return null;
@@ -168,7 +187,11 @@ class Bluesnap extends \yii\base\Object
      */
     public function getCart()
     {
-        $cart = new Cart();
+        if (isset($this->modelMap['cart'])) {
+            $cart = new $this->modelMap['cart'];
+        } else {
+            $cart = new Cart();
+        }
         $cart->module = Yii::$app->getModule($this->moduleName);
         $cart->setUrl();
         return $cart;
@@ -196,7 +219,12 @@ class Bluesnap extends \yii\base\Object
      */
     public function getOrderModel($where = [], $indexBy = 'id', $single = false)
     {
-        $array = $this->getCommon(Order::className(), $where, $indexBy, false);
+        $array = $this->getCommon(
+            isset($this->modelMap['order']) ? $this->modelMap['order'] : Order::className(),
+            $where,
+            $indexBy,
+            false
+        );
         if ($single) {
             if (empty($array)) {
                 return null;
@@ -211,7 +239,11 @@ class Bluesnap extends \yii\base\Object
      */
     public function getSubscriptionModel()
     {
-        $subscription = new Subscription;
+        if (isset($this->modelMap['subscription'])) {
+            $subscription = new $this->modelMap['subscription'];
+        } else {
+            $subscription = new Subscription();
+        }
         $subscription->module = Yii::$app->getModule($this->moduleName);
         $subscription->setUrl();
         return $subscription;

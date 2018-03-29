@@ -6,8 +6,6 @@ use yii\base\InvalidConfigException;
 use achertovsky\bluesnap\models\Order;
 use achertovsky\bluesnap\traits\Common;
 use Yii;
-use achertovsky\bluesnap\helpers\Xml;
-use achertovsky\bluesnap\helpers\Request;
 
 /**
  * @property integer $shopperId
