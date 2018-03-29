@@ -205,6 +205,9 @@ class IPN extends \yii\base\Object
             $order->subscription_id = $this->post['subscriptionId'];
         }
         $order->status = Order::STATUS_COMPLETED;
+        if (!$order->validate()) {
+            Yii::trace("Validation errors is: ".var_export($order->errors, true));
+        }
         return $order->save();
     }
     
