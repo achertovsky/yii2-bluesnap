@@ -175,6 +175,9 @@ class IPN extends \yii\base\Object
             //try to find order through subscription id
             $shopperId = $this->post['accountId'];
             $productId = $this->post['productId'];
+            if (!isset($this->post['subscriptionId'])) {
+                return;
+            }
             $subscriptionId = $this->post['subscriptionId'];
             $retryOrder = $order = self::findOrder(
                 $this->post,
