@@ -44,6 +44,15 @@ class Order extends Core
     const STATUS_CANCELLED = 2;
     
     /**
+     * To use, lets say, in dropdown
+     */
+    const STATUSES_ARRAY = [
+        0 => 'Created',
+        1 => 'Completed',
+        2 => 'Cancelled',
+    ];
+    
+    /**
      * @inheritdoc
      */
     public function rules()
@@ -109,5 +118,21 @@ class Order extends Core
         /* @var $subscription Subscription */
         $subscription = $this->subscription;
         return $subscription->switchSubscriptionContract($this->subscription_id, $skuId, $this->shopper_id);
+    }
+    
+    /**
+     * @param int $statusId
+     * @return string
+     */
+    public static function getStatusName($statusId)
+    {
+        switch ($statusId) {
+            case self::STATUS_CREATED:
+                return 'Created';
+            case self::STATUS_COMPLETED:
+                return 'Completed';
+            case self::STATUS_CANCELLED:
+                return 'Cancelled';
+        }
     }
 }
