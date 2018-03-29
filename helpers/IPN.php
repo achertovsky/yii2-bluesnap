@@ -156,7 +156,12 @@ class IPN extends \yii\base\Object
         } elseif ($overrideWhere) {
             $where = $whereAdditions;
         }
-        $order = Order::find()->where($where)->orderBy('id desc')->one();
+        if (isset(Yii::$app->bluesnap->modelMap['order'])) {
+            $className = Yii::$app->bluesnap->modelMap['order'];
+        } else {
+            $className = Order::className();
+        }
+        $order = $className::find()->where($where)->orderBy('id desc')->one();
         if (empty($order)) {
             Yii::trace("No such order exist shopper_id: $shopperId; product_id: $productId; sku_id: ".$skuId);
         } else {

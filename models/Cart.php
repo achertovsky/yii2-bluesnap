@@ -91,6 +91,9 @@ class Cart
         $parameters['shopperId'] = $shopperId;
         $parameters['pageName'] = "AUTO_LOGIN_PAGE";
         $parameters['expirationInMinutes'] = $this->module->expirationInMinutes;
+        if (empty($parameters['thankyou.backtosellerurl']) && isset($this->module->backToSellerUrl)) {
+            $parameters['thankyou.backtosellerurl'] = $this->module->backToSellerUrl;
+        }
         //encrypt those who should be encrypted
         $toEncrypt = [];
         $haveToBeEncrypted = [
