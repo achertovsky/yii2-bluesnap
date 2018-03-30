@@ -110,6 +110,7 @@ class IPN extends \yii\base\Object
         $this->post = Yii::$app->request->post();
         Yii::info("Got: ".var_export($this->post, true));
         if (isset($this->post['transactionType'])) {
+            $this->status = null;
             switch ($this->post['transactionType']) {
                 case "CHARGE":
                     $this->handleCharge();
@@ -118,6 +119,7 @@ class IPN extends \yii\base\Object
                     $this->handleCharge();
                     break;
                 case "RECURRING":
+                    $this->status = Order::STATUS_COMPLETED;
                     $this->handleCharge();
                     break;
                 case "CANCELLATION":
@@ -136,6 +138,12 @@ class IPN extends \yii\base\Object
     }
     
     /**
+     * If this value set - will use findOrder with this status for order
+     * @var int
+     */
+    protected $status = null;
+    
+    /**
      * @param array $post
      * @param array $whereAdditions
      * @return Order
@@ -151,6 +159,9 @@ class IPN extends \yii\base\Object
             ['=', 'sku_id', $skuId],
             ['=', 'product_id', $productId],
         ];
+        if (!empty($this->status)) {
+            $where[] = ['=', 'status', $this->status];
+        }
         if (!empty($whereAdditions) && !$overrideWhere) {
             $where = ArrayHelper::merge($where, $whereAdditions);
         } elseif ($overrideWhere) {
