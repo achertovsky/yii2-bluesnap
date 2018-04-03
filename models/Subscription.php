@@ -59,8 +59,7 @@ class Subscription extends \yii\base\Object
      */
     public function switchSubscriptionContract($subscriptionId, $contractId, $shopperId)
     {
-        $body = Xml::prepareBody(
-            'subscription',
+        return $this->updateSubscription(
             [
                 'subscription_id' => $subscriptionId,
                 'status' => Subscription::STATUS_ACTIVE,
@@ -68,8 +67,35 @@ class Subscription extends \yii\base\Object
                 'underlying_sku_id' => $contractId,
             ]
         );
+    }
+    
+    /**
+     * @param int $subscriptionId
+     * @return boolean
+     */
+    public function cancelSubscription($subscriptionId)
+    {
+        return $this->updateSubscription(
+            [
+                'subscription_id' => $subscriptionId,
+                'status' => Subscription::STATUS_CANCELLED,
+            ]
+        );
+    }
+    
+    /**
+     * @param array $params
+     * Required to have $params['subscription_id']
+     * @return boolean
+     */
+    public function updateSubscription($params)
+    {
+        $body = Xml::prepareBody(
+            'subscription',
+            $params
+        );
         $response = Request::put(
-            $this->url.$subscriptionId,
+            $this->url.$params['subscription_id'],
             $body,
             [
                 'Content-Type' => 'application/xml',
