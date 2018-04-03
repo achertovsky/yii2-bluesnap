@@ -21,6 +21,7 @@ use achertovsky\bluesnap\models\Subscription;
  * @property integer $quantity
  * @property integer $product_id
  * @property integer $subscription_id
+ * @property double $usd_amount
  *
  * @property Shopper $shopper
  * @property Sku $sku
@@ -39,7 +40,6 @@ class Order extends Core
     /**
      * List of possible status codes
      */
-    const STATUS_CREATED = 0;
     const STATUS_COMPLETED = 1;
     const STATUS_CANCELLED = 2;
     
@@ -47,7 +47,6 @@ class Order extends Core
      * To use, lets say, in dropdown
      */
     const STATUSES_ARRAY = [
-        0 => 'Created',
         1 => 'Completed',
         2 => 'Cancelled',
     ];
@@ -63,6 +62,7 @@ class Order extends Core
             [['shopper_id'], 'exist', 'skipOnError' => false, 'targetClass' => Shopper::className(), 'targetAttribute' => ['shopper_id' => 'shopper_id']],
             [['sku_id'], 'exist', 'skipOnError' => false, 'targetClass' => Sku::className(), 'targetAttribute' => ['sku_id' => 'sku_id']],
             [['product_id'], 'exist', 'skipOnError' => false, 'targetClass' => Sku::className(), 'targetAttribute' => ['product_id' => 'product_id']],
+            [['usd_amount'], 'double', 'min' => 0],
         ];
     }
 
@@ -127,8 +127,6 @@ class Order extends Core
     public static function getStatusName($statusId)
     {
         switch ($statusId) {
-            case self::STATUS_CREATED:
-                return 'Created';
             case self::STATUS_COMPLETED:
                 return 'Completed';
             case self::STATUS_CANCELLED:

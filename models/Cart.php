@@ -56,35 +56,6 @@ class Cart
         }
         $skuIds = [];
         foreach ($this->data as $value) {
-            $productId = Sku::find()->where(
-                [
-                    'sku_id' => $value['sku_id']
-                ]
-            )->select('product_id')->scalar();
-            //check mb order already exist
-            $order = Order::find()->where(
-                [
-                    'sku_id' => $value['sku_id'],
-                    'quantity' => $value['quantity'],
-                    'shopper_id' => $shopperId,
-                    'status' => Order::STATUS_CREATED,
-                    'product_id' => $productId,
-                ]
-            )->exists();
-            //create new if not
-            if (empty($order)) {
-                $order = new Order();
-                $order->setAttributes(
-                    [
-                        'sku_id' => $value['sku_id'],
-                        'quantity' => $value['quantity'],
-                        'shopper_id' => $shopperId,
-                        'status' => Order::STATUS_CREATED,
-                        'product_id' => $productId,
-                    ]
-                );
-                $order->save();
-            }
             $parameters["sku{$value['sku_id']}"] = $value['quantity'];
             $skuIds[] = $value['sku_id'];
         }

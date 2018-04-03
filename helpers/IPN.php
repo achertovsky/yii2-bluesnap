@@ -11,7 +11,6 @@ namespace achertovsky\bluesnap\helpers;
 use achertovsky\bluesnap\traits\Common;
 use achertovsky\bluesnap\models\Order;
 use Yii;
-use yii\helpers\ArrayHelper;
 use yii\base\Event;
 
 /**
@@ -113,22 +112,22 @@ class IPN extends \yii\base\Object
             $this->status = null;
             switch ($this->post['transactionType']) {
                 case "CHARGE":
-                    $this->handleCharge();
+                    $this->status = Order::STATUS_COMPLETED;
                     break;
                 case "AUTH_ONLY":
-                    $this->handleCharge();
+                    $this->status = Order::STATUS_COMPLETED;
                     break;
                 case "RECURRING":
                     $this->status = Order::STATUS_COMPLETED;
-                    $this->handleCharge();
                     break;
                 case "CANCELLATION":
-                    $this->handleCancel();
+                    $this->status = Order::STATUS_CANCELLED;
                     break;
                 case "DECLINE":
-                    $this->handleCancel();
+                    $this->status = Order::STATUS_CANCELLED;
                     break;
             }
+            $this->handle();
             Event::trigger(IPN::className(), $this->post['transactionType'], new Event(['sender' => $this]));
         }
         
@@ -144,98 +143,27 @@ class IPN extends \yii\base\Object
     protected $status = null;
     
     /**
-     * @param array $post
-     * @param array $whereAdditions
-     * @return Order
-     */
-    public function findOrder($post, $whereAdditions = [], $overrideWhere = false)
-    {
-        $shopperId = $post['accountId'];
-        $productId = $post['productId'];
-        $skuId = $post['contractId'];
-        $where = [
-            'and',
-            ['=', 'shopper_id', $shopperId],
-            ['=', 'sku_id', $skuId],
-            ['=', 'product_id', $productId],
-        ];
-        if (!empty($this->status)) {
-            $where[] = ['=', 'status', $this->status];
-        }
-        if (!empty($whereAdditions) && !$overrideWhere) {
-            $where = ArrayHelper::merge($where, $whereAdditions);
-        } elseif ($overrideWhere) {
-            $where = $whereAdditions;
-        }
-        if (isset(Yii::$app->bluesnap->modelMap['order'])) {
-            $className = Yii::$app->bluesnap->modelMap['order'];
-        } else {
-            $className = Order::className();
-        }
-        $order = $className::find()->where($where)->orderBy('id desc')->one();
-        if (empty($order)) {
-            Yii::trace("No such order exist shopper_id: $shopperId; product_id: $productId; sku_id: ".$skuId);
-        } else {
-            $order->quantity = $post['quantity'];
-        }
-        return $order;
-    }
-    
-    /**
      * @return bool
      */
-    public function handleCharge()
+    public function handle()
     {
-        $order = self::findOrder($this->post);
-        if (empty($order)) {
-            //try to find order through subscription id
-            $shopperId = $this->post['accountId'];
-            $productId = $this->post['productId'];
-            if (!isset($this->post['subscriptionId'])) {
-                return;
-            }
-            $subscriptionId = $this->post['subscriptionId'];
-            $retryOrder = $order = self::findOrder(
-                $this->post,
-                [
-                    'and',
-                    ['=', 'product_id', $productId],
-                    ['=', 'shopper_id', $shopperId],
-                    ['=', 'subscription_id', $subscriptionId],
-                ],
-                true
-            );
-            if (empty($retryOrder)) {
-                return;
-            } else {
-                $order = $retryOrder;
-                $order->sku_id = $this->post['contractId'];
-            }
-        }
+        $order = Yii::$app->bluesnap->orderModel;
+        $order->setAttributes(
+            [
+                'shopper_id' => $this->post['accountId'],
+                'product_id' => $this->post['productId'],
+                'sku_id' => $this->post['contractId'],
+                'quantity' => $this->post['quantity'],
+                'usd_amount' => $this->post['invoiceAmountUSD'],
+            ]
+        );
         if (isset($this->post['subscriptionId'])) {
             $order->subscription_id = $this->post['subscriptionId'];
         }
-        $order->status = Order::STATUS_COMPLETED;
+        $order->status = $this->status;
         if (!$order->validate()) {
             Yii::trace("Validation errors is: ".var_export($order->errors, true));
         }
-        return $order->save();
-    }
-    
-    /**
-     * @return bool
-     */
-    public function handleCancel()
-    {
-        $where = [];
-        if ($this->post['subscriptionId']) {
-            $where = [['=', 'subscription_id', $this->post['subscriptionId']]];
-        }
-        $order = self::findOrder($this->post, $where);
-        if (empty($order)) {
-            return;
-        }
-        $order->status = Order::STATUS_CANCELLED;
         return $order->save();
     }
 }
