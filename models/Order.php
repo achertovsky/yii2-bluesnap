@@ -8,6 +8,9 @@ use achertovsky\bluesnap\models\Shopper;
 use achertovsky\bluesnap\models\Sku;
 use achertovsky\bluesnap\models\Product;
 use achertovsky\bluesnap\models\Subscription;
+use achertovsky\bluesnap\models\PricingSettings;
+use achertovsky\bluesnap\helpers\Request;
+use achertovsky\bluesnap\helpers\Xml;
 
 /**
  * This is the model class for table "bluesnap_cart".
@@ -132,5 +135,77 @@ class Order extends Core
             case self::STATUS_CANCELLED:
                 return 'Cancelled';
         }
+    }
+    
+    /**
+     * Places an order for existing user
+     * @param int $shopperId
+     * @param int $skuId
+     * @param int $quantity
+     * @return boolean
+     */
+    public function createOrderWithExistingShopper($shopperId, $skuId, $quantity = 1)
+    {
+        /* @var $sku Sku */
+        $sku = Yii::$app->bluesnap->getSkuModel(
+            [
+                'sku_id' => $skuId,
+            ],
+            null,
+            true
+        );
+        /* @var $shopper Shopper */
+        $shopper = Yii::$app->bluesnap->getShopperModel(
+            [
+                'shopper_id' => $shopperId,
+            ],
+            null,
+            true
+        );
+        if (empty($shopper) || empty($sku)) {
+            return false;
+        }
+        /* @var $pricingSettings PricingSettings */
+        $pricingSettings = $sku->pricingSettings;
+        $body = Xml::prepareBody(
+            'order',
+            [
+                'ordering_shopper' => [
+                    'shopper_id' => $shopperId,
+                    'web_info' => $shopper->web_info,
+                    'fraud_info' => $shopper->fraud_info,
+                    'authorized_by_shopper' => true,
+                ],
+                'cart' => [
+                    'cart_item' => [
+                        'sku' => [
+                            'sku_id' => $skuId,
+                        ],
+                        'quantity' => $quantity,
+                    ],
+                ],
+                'expected-total-price' => [
+                    'currency' => $pricingSettings->getCurrency(),
+                    'amount' => $pricingSettings->getPrice(),
+                ],
+            ]
+        );
+        $response = Request::post(
+            $this->module->sandbox ? "https://sandbox.bluesnap.com/services/2/orders" : "https://ws.bluesnap.com/services/2/orders",
+            $body,
+            [
+                'Content-Type' => 'application/xml',
+                'Authorization' => $this->module->authToken,
+            ]
+        );
+        
+        $code = $response->getStatusCode();
+        //docs says 201 - success
+        if (in_array($code, [201, 200])) {
+            return true;
+        }
+        $content = Xml::parse($response->getContent());
+        Yii::error(var_export($content, true));
+        return false;
     }
 }

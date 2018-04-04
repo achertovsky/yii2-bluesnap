@@ -3,7 +3,6 @@
 namespace achertovsky\bluesnap\models;
 
 use yii\base\InvalidConfigException;
-use achertovsky\bluesnap\models\Order;
 use achertovsky\bluesnap\traits\Common;
 use Yii;
 
@@ -49,7 +48,7 @@ class Cart
      * Buynow link
      * @throws InvalidConfigException
      */
-    public function processOrder($shopperId, $parameters = [])
+    public function proceedToBuyNow($shopperId, $parameters = [])
     {
         if (empty($this->data)) {
             throw new InvalidConfigException("No skus added");
@@ -70,7 +69,7 @@ class Cart
         $haveToBeEncrypted = [
             "sku%dpriceamount", "sku%drecurringpriceamount", "sku%dpricecurrency",
             "sku%drecurringpricecurrency", "sku%dtrialdays", "thankyou.backtosellerurl",
-            "shopperId", "expirationInMinutes", "pageName"
+            "shopperId", "expirationInMinutes", "pageName",
         ];
         foreach ($haveToBeEncrypted as $value) {
             foreach ($skuIds as $skuId) {

@@ -3,6 +3,7 @@
 namespace achertovsky\bluesnap;
 
 use yii\base\InvalidConfigException;
+use Yii;
 
 /**
  * @author alexander
@@ -41,6 +42,7 @@ class Module extends \yii\base\Module
      */
     public function init()
     {
+        Yii::setAlias('@achertovsky/bluesnap/controllers', __DIR__.DIRECTORY_SEPARATOR.'controllers');
         parent::init();
         if (!empty($this->username) && !empty($this->password)) {
             $this->authToken = "Basic ".base64_encode($this->username.':'.$this->password);
