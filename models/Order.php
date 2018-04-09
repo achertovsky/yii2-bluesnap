@@ -64,7 +64,7 @@ class Order extends Core
             [['created_at', 'updated_at', 'shopper_id', 'sku_id', 'status', 'quantity', 'product_id', 'subscription_id'], 'integer'],
             [['shopper_id'], 'exist', 'skipOnError' => false, 'targetClass' => Shopper::className(), 'targetAttribute' => ['shopper_id' => 'shopper_id']],
             [['sku_id'], 'exist', 'skipOnError' => false, 'targetClass' => Sku::className(), 'targetAttribute' => ['sku_id' => 'sku_id']],
-            [['product_id'], 'exist', 'skipOnError' => false, 'targetClass' => Sku::className(), 'targetAttribute' => ['product_id' => 'product_id']],
+            [['product_id'], 'exist', 'skipOnError' => false, 'targetClass' => Product::className(), 'targetAttribute' => ['product_id' => 'product_id']],
             [['usd_amount'], 'double', 'min' => 0],
         ];
     }
