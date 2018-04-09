@@ -148,6 +148,7 @@ class IPN extends \yii\base\Object
     public function handle()
     {
         $order = Yii::$app->bluesnap->orderModel;
+        $order->ipnPost = $this->post;
         $order->setAttributes(
             [
                 'shopper_id' => $this->post['accountId'],

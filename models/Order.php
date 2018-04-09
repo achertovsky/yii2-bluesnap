@@ -25,6 +25,7 @@ use achertovsky\bluesnap\helpers\Xml;
  * @property integer $product_id
  * @property integer $subscription_id
  * @property double $usd_amount
+ * @property array $ipnPost
  *
  * @property Shopper $shopper
  * @property Sku $sku
@@ -208,4 +209,9 @@ class Order extends Core
         Yii::error(var_export($content, true));
         return false;
     }
+    
+    /**
+     * @var array 
+     */
+    public $ipnPost = [];
 }
