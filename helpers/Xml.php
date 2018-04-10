@@ -83,6 +83,7 @@ class Xml extends \yii\base\Model
             $type = $xmlPart['type'];
             if ($type == 'close') {
                 //if close tag found - ignore it
+                unset($array[$key]);
                 return $result;
             }
             $tag = str_replace('-', '_', strtolower($xmlPart['tag']));
