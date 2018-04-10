@@ -166,6 +166,7 @@ class Shopper extends Core
             } 
         }
         $content = Xml::parse($response->getContent());
+        Yii::error(var_export($content, true));
         return false;
     }
     
