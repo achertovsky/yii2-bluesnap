@@ -109,5 +109,6 @@ class Xml extends \yii\base\Model
             //drop from list those who was used
             unset($array[$key]);
         }
+        return $result;
     }
 }
