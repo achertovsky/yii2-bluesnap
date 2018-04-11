@@ -150,6 +150,10 @@ class IPN extends \yii\base\Object
      */
     public function handle()
     {
+        //ipns with no money is not supported by default
+        if (!isset($this->post['invoiceAmountUSD'])) {
+            return false;
+        } 
         $order = Yii::$app->bluesnap->orderModel;
         $order->ipnPost = $this->post;
         $order->setAttributes(
