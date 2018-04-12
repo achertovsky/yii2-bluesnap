@@ -202,6 +202,7 @@ class Country
         "Romania" => "ro",
         "Serbia" => "rs",
         "Russian Federation" => "ru",
+        "Russia" => "ru",
         "Rwanda" => "rw",
         "Saudi Arabia" => "sa",
         "Solomon Islands" => "sb",
