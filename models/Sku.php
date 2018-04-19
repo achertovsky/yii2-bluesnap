@@ -85,11 +85,11 @@ class Sku extends Core
         return [
             [['sku_id'], 'unique'],
             [['product_id', 'sku_type', 'pricing_settings', 'sku_id'], 'required'],
-            [['created_at', 'updated_at', 'product_id', 'collect_shipping_address', 'sku_id'], 'integer'],
+            [['created_at', 'updated_at', 'product_id', 'sku_id'], 'integer'],
             [['pricing_settings', 'contract_name', 'sku_image', 'sku_quantity_policy', 'sku_effective_dates', 'sku_coupon_settings', 'sku_custom_parameters'], 'string'],
             [['sku_status'], 'string', 'max' => 1],
             [['sku_type'], 'string', 'max' => 255],
-            [['default'], 'boolean'],
+            [['default', 'collect_shipping_address'], 'boolean'],
         ];
     }
 

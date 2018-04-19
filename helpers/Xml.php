@@ -103,6 +103,9 @@ class Xml extends \yii\base\Model
                     break;
                 case 'complete':
                     //if tag is completed - store info
+                    if (in_array($value, ['true', 'false'])) {
+                        $value = $value == 'true' ? true : false;
+                    }
                     $result[$openName][$tag] = $value;
                     break;
             }
