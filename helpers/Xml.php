@@ -29,7 +29,7 @@ class Xml extends \yii\base\Model
         foreach ($data as $fieldName => $value) {
             $emptyVal = empty($value);
             $inArray = in_array($fieldName, $ignore, true);
-            if ($inArray || $emptyVal) {
+            if ($inArray || ($emptyVal && !is_bool($value))) {
                 continue;
             }
             $fieldName = str_replace('_', '-', $fieldName);
