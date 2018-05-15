@@ -236,4 +236,18 @@ class PricingSettings extends Model
         }
         return false;
     }
+    
+    /**
+     * Allows to upgrade grace period
+     * @param int $period
+     * @return boolean
+     */
+    public function setGracePeriod($period = 0)
+    {
+        if (!isset($this->recurring_plan_settings['grace_period_length'])) {
+            return false;
+        }
+        $this->recurring_plan_settings['grace_period_length'] = $period;
+        return true;
+    }
 }

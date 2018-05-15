@@ -84,6 +84,7 @@ class Subscription extends \yii\base\Object
     }
     
     /**
+     * Docs: https://developers.bluesnap.com/v8976-Extended/docs/update-subscription
      * @param array $params
      * Required to have $params['subscription_id']
      * @return boolean
