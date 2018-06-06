@@ -28,7 +28,7 @@ class Xml extends \yii\base\Model
         $result = empty($wrapBy) ? '' : $result;
         foreach ($data as $fieldName => $value) {
             $inArray = in_array($fieldName, $ignore, true);
-            if ($inArray) {
+            if ($inArray || is_null($value)) {
                 continue;
             }
             $fieldName = str_replace('_', '-', $fieldName);
