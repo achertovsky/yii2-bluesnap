@@ -26,6 +26,7 @@ use achertovsky\bluesnap\helpers\Xml;
  * @property integer $subscription_id
  * @property double $usd_amount
  * @property array $ipnPost
+ * @property string $reference_number
  *
  * @property Shopper $shopper
  * @property Sku $sku
@@ -67,6 +68,7 @@ class Order extends Core
             [['sku_id'], 'exist', 'skipOnError' => false, 'targetClass' => Sku::className(), 'targetAttribute' => ['sku_id' => 'sku_id']],
             [['product_id'], 'exist', 'skipOnError' => false, 'targetClass' => Product::className(), 'targetAttribute' => ['product_id' => 'product_id']],
             [['usd_amount'], 'double'],
+            [['reference_number'], 'string', 'max' => 255],
         ];
     }
 

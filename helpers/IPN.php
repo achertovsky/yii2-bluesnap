@@ -153,8 +153,17 @@ class IPN extends \yii\base\Object
         //ipns with no money is not supported by default
         if (!isset($this->post['invoiceAmountUSD'])) {
             return false;
-        } 
-        $order = Yii::$app->bluesnap->orderModel;
+        }
+        $order = Yii::$app->bluesnap->getOrderModel(
+            [
+                'reference_number' => $this->post['referenceNumber'],
+            ],
+            'id',
+            true
+        );
+        if (empty($order)) {
+            $order = Yii::$app->bluesnap->orderModel;
+        }
         $order->ipnPost = $this->post;
         $order->setAttributes(
             [
@@ -163,6 +172,7 @@ class IPN extends \yii\base\Object
                 'sku_id' => $this->post['contractId'],
                 'quantity' => $this->post['quantity'],
                 'usd_amount' => $this->post['invoiceAmountUSD'],
+                'reference_number' => $this->post['referenceNumber'],
             ]
         );
         if (isset($this->post['subscriptionId'])) {
