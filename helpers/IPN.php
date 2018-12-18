@@ -182,6 +182,19 @@ class IPN extends \yii\base\Object
         if (!$order->validate()) {
             Yii::trace("Validation errors is: ".var_export($order->errors, true));
         }
-        return $order->save();
+        if ($order->validate()) {
+            // update all previous subscriptions to cancelled status before save new one
+            if (!empty($this->post['subscriptionId'])) {
+                Order::updateAll(
+                    [
+                        'status' => Order::STATUS_CANCELLED,
+                    ],
+                    [
+                        'subscription_id' => $this->post['subscriptionId'],
+                    ]
+                );
+            }
+            return $order->save();
+        }
     }
 }
