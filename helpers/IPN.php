@@ -129,6 +129,9 @@ class IPN extends \yii\base\Object
                 case "CANCELLATION_REFUND":
                     $this->status = Order::STATUS_CANCELLED;
                     break;
+                case "REFUND":
+                    $this->status = Order::STATUS_COMPLETED;
+                    break;
             }
             $this->handle();
             Event::trigger(IPN::className(), $this->post['transactionType'], new Event(['sender' => $this]));
