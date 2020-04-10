@@ -7,7 +7,6 @@ use achertovsky\bluesnap\models\Core;
 use achertovsky\bluesnap\helpers\Request;
 use achertovsky\bluesnap\helpers\Xml;
 use yii\helpers\ArrayHelper;
-use achertovsky\bluesnap\models\Sku;
 
 /**
  * This is the model class for table "bluesnap_sku".

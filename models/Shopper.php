@@ -163,7 +163,7 @@ class Shopper extends Core
             }
             if ($this->save()) {
                 return $this;
-            } 
+            }
         }
         $content = Xml::parse($response->getContent());
         Yii::error(var_export($content, true));
