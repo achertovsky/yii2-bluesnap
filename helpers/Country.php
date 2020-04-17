@@ -205,6 +205,7 @@ class Country
         "Puerto Rico" => "pr",
         "Qatar" => "qa",
         "Reunion (French)" => "re",
+        "Réunion" => "re",
         "Romania" => "ro",
         "Russian Federation" => "ru",
         "Russia" => "ru",
