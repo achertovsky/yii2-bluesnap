@@ -213,6 +213,7 @@ class Country
         "S. Georgia & S. Sandwich Isls." => "gs",
         "Saint Helena" => "sh",
         "Saint Kitts & Nevis Anguilla" => "kn",
+        "St Kitts and Nevis" => "kn",
         "Saint Lucia" => "lc",
         "Saint Martin" => "mf",
         "Saint Pierre and Miquelon" => "pm",
