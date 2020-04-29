@@ -76,6 +76,7 @@ class Country
         "Costa Rica" => "cr",
         "Croatia" => "hr",
         "Curacao" => "cw",
+        "Curaçao" => "cw",
         "Cyprus" => "cy",
         "Czech Republic" => "cz",
         "Czechia" => "cz",
