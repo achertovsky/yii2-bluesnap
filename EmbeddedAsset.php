@@ -4,7 +4,6 @@ namespace achertovsky\bluesnap;
 
 use yii\web\AssetBundle;
 use achertovsky\bluesnap\helpers\EmbeddedCheckout;
-use common\overrides\helpers\ArrayHelper;
 
 class EmbeddedAsset extends AssetBundle
 {
