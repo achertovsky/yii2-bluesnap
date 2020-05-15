@@ -18,7 +18,7 @@ use achertovsky\bluesnap\models\Subscription;
  *
  * @author alexander
  */
-class Bluesnap extends \yii\base\Object
+class Bluesnap extends \yii\base\BaseObject
 {
     /**
      * Gonna contain map to classes.
