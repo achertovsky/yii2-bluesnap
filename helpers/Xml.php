@@ -58,58 +58,82 @@ class Xml extends \yii\base\Model
         $parser = xml_parser_create();
         xml_parse_into_struct($parser, $xml, $xmlArray);
         xml_parser_free($parser);
-        $result = self::getLevelData($xmlArray);
-        return $result;
+        return self::formatXml($xmlArray);
     }
     
     /**
-     * RECURSIVE
      * Gathers data from result of xml_parse_into_struct to better format
      * @param array $array
      * @return array
      */
-    private static function getLevelData(&$array)
+    private static function formatXml($array)
     {
-        //predefine
-        $openName = '';
         $result = [];
-        //while used instead of foreach cause foreach works with copy of income array
-        while (!empty($array)) {
-            //emulate key => value in while
-            $xmlPart = reset($array);
-            $key = key($array);
-            
-            $type = $xmlPart['type'];
-            if ($type == 'close') {
-                //if close tag found - ignore it
-                unset($array[$key]);
-                return $result;
+        $routes = [];
+        $multilinesTags = [];
+        foreach ($array as $key => $data) {
+            $tag = str_replace('-', '_', strtolower($data['tag']));
+            $value = isset($data['value']) ? $data['value'] : '';
+            if (in_array($value, ['true', 'false'])) {
+                $value = $value == 'true' ? true : false;
             }
-            $tag = str_replace('-', '_', strtolower($xmlPart['tag']));
-            $value = isset($xmlPart['value']) ? $xmlPart['value'] : '';
-            switch ($type) {
+            switch ($data['type']) {
+                case 'cdata':
+                    $currentPointer = &$routes[$tag];
+                    break;
                 case 'open':
-                    if ($openName == '') {
-                        //if no open tag - gather it
-                        $openName = $tag;
+                    /**
+                     * In case of open tag create new array key
+                     * or find existing one and make it work point
+                     */
+                    if (!isset($routes[$tag])) {
+                        $currentPointer = &$result;
+                        foreach ($routes as $name => $route) {
+                            $currentPointer = &$currentPointer[$name];
+                            /**
+                             * if tag came on path is multilevel - we guaranteed working with last element
+                             * guarantee comes with fact that we going from top to bottom of xml
+                             * filling always last element
+                             */
+                            if (in_array($name, $multilinesTags)) {
+                                end($currentPointer);
+                                $currentPointer = &$currentPointer[key($currentPointer)];
+                            }
+                        }
+                        if (!isset($currentPointer[$tag]) && !in_array($tag, $multilinesTags)) {
+                            //data is the only on level
+                            $currentPointer[$tag] = [];
+                            $routes[$tag] = &$currentPointer[$tag];
+                            $currentPointer = &$routes[$tag];
+                        } else {
+                            //data level has multiple lines
+                            if (!in_array($tag, $multilinesTags)) {
+                                $multilinesTags[] = $tag;
+                                $existingData = $currentPointer[$tag];
+                                $currentPointer = [
+                                    $tag => [
+                                        'multilines' => true,
+                                        $existingData,
+                                    ],
+                                ];
+                            }
+                            $currentPointer[$tag][] = [];
+                            end($currentPointer[$tag]);
+                            $lastKey = key($currentPointer[$tag]);
+                            $routes[$tag] = &$currentPointer[$tag][$lastKey];
+                            $currentPointer = &$currentPointer[$tag][$lastKey];
+                        }
                     } else {
-                        //if there is open tag - it means that this item is sublevel, gather data from lower level
-                        $result[$openName] = ArrayHelper::merge(
-                            isset($result[$openName]) ? $result[$openName] : [],
-                            self::getLevelData($array)
-                        );
+                        $currentPointer = &$routes[$tag];
                     }
                     break;
                 case 'complete':
-                    //if tag is completed - store info
-                    if (in_array($value, ['true', 'false'])) {
-                        $value = $value == 'true' ? true : false;
-                    }
-                    $result[$openName][$tag] = $value;
+                    $currentPointer[$tag] = $value;
+                    break;
+                case 'close':
+                    unset($routes[$tag]);
                     break;
             }
-            //drop from list those who was used
-            unset($array[$key]);
         }
         return $result;
     }

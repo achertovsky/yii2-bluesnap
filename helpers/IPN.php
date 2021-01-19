@@ -112,29 +112,20 @@ class IPN extends \yii\base\Object
             $this->status = null;
             switch ($this->post['transactionType']) {
                 case "CHARGE":
-                    $this->status = Order::STATUS_COMPLETED;
-                    break;
                 case "AUTH_ONLY":
-                    $this->status = Order::STATUS_COMPLETED;
-                    break;
                 case "RECURRING":
+                case "REFUND":
+                case "CHARGEBACK":
                     $this->status = Order::STATUS_COMPLETED;
                     break;
                 case "CANCELLATION":
-                    $this->status = Order::STATUS_CANCELLED;
-                    break;
                 case "DECLINE":
-                    $this->status = Order::STATUS_CANCELLED;
-                    break;
                 case "CANCELLATION_REFUND":
                     $this->status = Order::STATUS_CANCELLED;
                     break;
-                case "REFUND":
-                    $this->status = Order::STATUS_COMPLETED;
-                    break;
             }
             $this->handle();
-            Event::trigger(IPN::className(), $this->post['transactionType'], new Event(['sender' => $this]));
+            Event::trigger(IPN::class, $this->post['transactionType'], new Event(['sender' => $this]));
         }
         
         $dataProtectionKey = Yii::$app->getModule(Yii::$app->bluesnap->moduleName)->dataProtectionKey;
@@ -183,7 +174,7 @@ class IPN extends \yii\base\Object
         }
         $order->status = $this->status;
         if (!$order->validate()) {
-            Yii::trace("Validation errors is: ".var_export($order->errors, true));
+            Yii::debug("Validation errors is: ".var_export($order->errors, true));
         }
         if ($order->validate()) {
             // update all previous subscriptions to cancelled status before save new one
