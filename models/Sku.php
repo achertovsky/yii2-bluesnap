@@ -281,6 +281,7 @@ class Sku extends Core
                 $this->sku_id = substr($location, strrpos($location, '/')+1);
             }
             $this->isNewRecord = true;
+            $this->id = null;
             if ($this->save()) {
                 return $this;
             } 
