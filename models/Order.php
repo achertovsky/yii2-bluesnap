@@ -3,17 +3,16 @@
 namespace achertovsky\bluesnap\models;
 
 use Yii;
-use achertovsky\bluesnap\models\Core;
-use achertovsky\bluesnap\models\Shopper;
 use achertovsky\bluesnap\models\Sku;
-use achertovsky\bluesnap\models\Product;
-use achertovsky\bluesnap\models\Subscription;
-use achertovsky\bluesnap\models\PricingSettings;
-use achertovsky\bluesnap\helpers\Request;
 use achertovsky\bluesnap\helpers\Xml;
+use achertovsky\bluesnap\models\Core;
+use achertovsky\bluesnap\models\Product;
+use achertovsky\bluesnap\models\Shopper;
+use achertovsky\bluesnap\helpers\Request;
+use achertovsky\bluesnap\models\Subscription;
 
 /**
- * This is the model class for table "bluesnap_cart".
+ * This is the model class for table "bluesnap_order".
  *
  * @property integer $id
  * @property integer $created_at
@@ -211,7 +210,7 @@ class Order extends Core
         Yii::error(var_export($content, true));
         return false;
     }
-    
+
     /**
      * @var array 
      */

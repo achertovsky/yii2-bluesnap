@@ -102,7 +102,7 @@ class IPN extends \yii\base\Object
      */
     public function handleIpn()
     {
-        if (!in_array(Yii::$app->request->getUserIP(), $this->ips)) {
+        if (!in_array(Yii::$app->request->getUserIP(), $this->ips) && !$this->module->sandbox) {
             Yii::info("Wrong ip");
             throw new \yii\web\NotFoundHttpException;
         }
