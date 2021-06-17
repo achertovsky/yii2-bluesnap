@@ -140,7 +140,7 @@ class IPN extends \yii\base\Object
     protected $status = null;
     
     /**
-     * @return bool
+     * @return void
      */
     public function handle()
     {
@@ -148,37 +148,25 @@ class IPN extends \yii\base\Object
         if (!isset($this->post['invoiceAmountUSD'])) {
             return false;
         }
-        $order = Yii::$app->bluesnap->getOrderModel(
-            [
-                'reference_number' => $this->post['referenceNumber'],
-            ],
-            'id',
-            true
-        );
-        if (empty($order)) {
-            $order = Yii::$app->bluesnap->orderModel;
-        }
-        $order->ipnPost = $this->post;
-        $order->setAttributes(
-            [
-                'shopper_id' => $this->post['accountId'],
-                'product_id' => $this->post['productId'],
-                'sku_id' => $this->post['contractId'],
-                'quantity' => $this->post['quantity'],
-                'usd_amount' => $this->post['invoiceAmountUSD'],
-                'reference_number' => $this->post['referenceNumber'],
-            ]
+        $order = self::getOrderModel(
+            $this->post['accountId'],
+            $this->post['productId'],
+            $this->post['contractId'],
+            $this->post['referenceNumber'],
+            $this->post['quantity'],
+            $this->post['invoiceAmountUSD'],
+            $this->status,
+            $this->post
         );
         if (isset($this->post['subscriptionId'])) {
+            Yii::debug("Main product is subscription");
             $order->subscription_id = $this->post['subscriptionId'];
         }
-        $order->status = $this->status;
-        if (!$order->validate()) {
-            Yii::debug("Validation errors is: ".var_export($order->errors, true));
-        }
+        $result = false;
         if ($order->validate()) {
             // update all previous subscriptions to cancelled status before save new one
             if (!empty($this->post['subscriptionId'])) {
+                Yii::debug("Item is subscription, cancel previous subscription orders");
                 Order::updateAll(
                     [
                         'status' => Order::STATUS_CANCELLED,
@@ -188,7 +176,72 @@ class IPN extends \yii\base\Object
                     ]
                 );
             }
-            return $order->save();
+            $order->save();
+        } else {
+            Yii::error("Validation errors is: ".var_export($order->errors, true));
         }
+        
+        //upsales
+        if (isset($this->post['promoteContractsNum']) && $this->post['promoteContractsNum'] > 0) {
+            Yii::debug($this->post['promoteContractsNum']." promote contracts was found");
+            for ($i = 0; $i < $this->post['promoteContractsNum']; $i++) {
+                $order = self::getOrderModel(
+                    $this->post['accountId'],
+                    $this->post["promoteProductId$i"],
+                    $this->post["promoteContractId$i"],
+                    $this->post['referenceNumber'],
+                    $this->post["promoteContractQuantity$i"],
+                    $this->post["promoteContractPrice$i"],
+                    $this->status,
+                    $this->post
+                );
+                if (!$order->save()) {
+                    Yii::error("Validation errors is: ".var_export($order->errors, true));
+                }
+            }
+        }
+    }
+
+    /**
+     * Code sugar
+     *
+     * @param integer $shopperId
+     * @param integer $productId
+     * @param integer $skuId
+     * @param integer $referenceNumber
+     * @param integer $quantity
+     * @param double $usdAmount
+     * @param integer $status
+     * @param array $postData
+     * @return \achertovsky\bluesnap\models\Order
+     */
+    protected static function getOrderModel($shopperId, $productId, $skuId, $referenceNumber, $quantity, $usdAmount, $status, $postData)
+    {
+        $order = Yii::$app->bluesnap->getOrderModel(
+            [
+                'shopper_id' => $shopperId,
+                'product_id' => $productId,
+                'sku_id' => $skuId,
+                'reference_number' => $referenceNumber,
+            ],
+            'id',
+            true
+        );
+        if (empty($order)) {
+            $order = Yii::$app->bluesnap->orderModel;
+        }
+        $order->ipnPost = $postData;
+        $order->setAttributes(
+            [
+                'shopper_id' => $shopperId,
+                'product_id' => $productId,
+                'sku_id' => $skuId,
+                'reference_number' => $referenceNumber,
+                'quantity' => $quantity,
+                'usd_amount' => $usdAmount,
+                'status' => $status,
+            ]
+        );
+        return $order;
     }
 }
