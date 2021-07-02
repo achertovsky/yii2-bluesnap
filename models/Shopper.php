@@ -173,14 +173,20 @@ class Shopper extends Core
     
     /**
      * Docs: https://developers.bluesnap.com/v8976-Extended/docs/update-shopper
+     * @param array $additionalData
+     * @param bool $updateModel defines if update model by additional data
      * @return boolean|\achertovsky\bluesnap\models\Shopper
      */
-    public function updateShopper()
+    public function updateShopper($additionalData = [], $updateModel = true)
     {
         if (!$this->validate()) {
             return false;
         }
-        $body = Xml::prepareBody('shopper', $this->getAttributes());
+        $attributes = ArrayHelper::merge($this->getAttributes(null, ['user_id']), $additionalData);
+        if ($updateModel) {
+            $this->setAttributes($attributes);
+        }
+        $body = Xml::prepareBody('shopper', $attributes);
         $response = Request::put(
             $this->url.'/'.$this->shopper_id,
             $body,
@@ -196,6 +202,8 @@ class Shopper extends Core
                 return $this;
             } 
         }
+        $content = Xml::parse($response->getContent());
+        Yii::error(var_export($content, true));
         return false;
     }
     
@@ -222,14 +230,14 @@ class Shopper extends Core
     }
     
     /**
-     * Dont store to db payment info
+     * Dont store to db credit card info
      * @inheritdoc
      */
     public function beforeSave($insert)
     {
         if (ActiveRecord::beforeSave($insert)) {
             $si = $this->shopper_info;
-            unset($si['payment_info']);
+            unset($si['payment_info']['credit-cards-info']['credit-card-info']['credit-card']);
             $this->shopper_info = $si;
             $this->processArrays();
             return true;

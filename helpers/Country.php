@@ -16,6 +16,21 @@ class Country
         $list = self::COUNTRY_LIST;
         return isset($list[$countryName]) ? $list[$countryName] : false;
     }
+
+    /**
+     * Returns handy dropdown format
+     *
+     * @return array
+     */
+    public static function getDropdownFormat()
+    {
+        $list = array_flip(self::COUNTRY_LIST);
+        foreach ($list as $code => $item) {
+            $list[strtoupper($code)] = $item;
+            unset($list[$code]);
+        }
+        return $list;
+    }
         
     /**
      * https://developers.bluesnap.com/docs/country-codes

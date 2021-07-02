@@ -12,6 +12,7 @@ use achertovsky\bluesnap\models\Cart;
 use achertovsky\bluesnap\helpers\IPN;
 use achertovsky\bluesnap\models\Order;
 use achertovsky\bluesnap\models\Subscription;
+use achertovsky\bluesnap\helpers\HostedPaymentFields;
 
 /**
  * Component contains all required actions
@@ -247,5 +248,19 @@ class Bluesnap extends \yii\base\BaseObject
         $subscription->module = Yii::$app->getModule($this->moduleName);
         $subscription->setUrl();
         return $subscription;
+    }
+
+    /**
+     * @return HostedPaymentFields
+     */
+    public function getHostedPaymentFieldsHelper()
+    {
+        $helper = new HostedPaymentFields(
+            [
+                'module' => Yii::$app->getModule($this->moduleName),
+            ]
+        );
+        $helper->setUrl();
+        return $helper;
     }
 }

@@ -121,6 +121,7 @@ class IPN extends \yii\base\Object
                 case "CANCELLATION":
                 case "DECLINE":
                 case "CANCELLATION_REFUND":
+                case "CANCEL_ON_RENEWAL":
                     $this->status = Order::STATUS_CANCELLED;
                     break;
             }

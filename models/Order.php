@@ -142,20 +142,12 @@ class Order extends Core
     /**
      * Places an order for existing user
      * @param int $shopperId
-     * @param int $skuId
-     * @param int $quantity
+     * @param int|array $skuId
+     * @param int|array $quantity in case of array input quantity may be set with corresponding to sku key
      * @return boolean
      */
     public function createOrderWithExistingShopper($shopperId, $skuId, $quantity = 1)
     {
-        /* @var $sku Sku */
-        $sku = Yii::$app->bluesnap->getSkuModel(
-            [
-                'sku_id' => $skuId,
-            ],
-            null,
-            true
-        );
         /* @var $shopper Shopper */
         $shopper = Yii::$app->bluesnap->getShopperModel(
             [
@@ -164,34 +156,50 @@ class Order extends Core
             null,
             true
         );
-        if (empty($shopper) || empty($sku)) {
+        if (empty($shopper)) {
             return false;
         }
-        /* @var $pricingSettings PricingSettings */
-        $pricingSettings = $sku->pricingSettings;
-        $body = Xml::prepareBody(
-            'order',
+        $bodyArray = [
+            'ordering_shopper' => [
+                'shopper_id' => $shopperId,
+                'web_info' => $shopper->web_info,
+                'fraud_info' => $shopper->fraud_info,
+                'authorized_by_shopper' => true,
+            ],
+            
+        ];
+        if (!is_array($skuId)) {
+            $skuId = [$skuId];
+        }
+        $priceAmount = 0;
+        $skuModels = Yii::$app->bluesnap->getSkuModel(
             [
-                'ordering_shopper' => [
-                    'shopper_id' => $shopperId,
-                    'web_info' => $shopper->web_info,
-                    'fraud_info' => $shopper->fraud_info,
-                    'authorized_by_shopper' => true,
-                ],
-                'cart' => [
-                    'cart_item' => [
-                        'sku' => [
-                            'sku_id' => $skuId,
-                        ],
-                        'quantity' => $quantity,
-                    ],
-                ],
-                'expected-total-price' => [
-                    'currency' => $pricingSettings->getCurrency(),
-                    'amount' => $pricingSettings->getPrice(),
-                ],
-            ]
+                'and',
+                ['in', 'sku_id', $skuId],
+            ],
+            'sku_id'
         );
+        foreach ($skuId as $key => $sku) {
+            if (!isset($skuModels[$sku])) {
+                continue;
+            }
+            $pricingSettings = $skuModels[$sku]->pricingSettings;
+            $priceAmount += $pricingSettings->getPrice();
+            $bodyArray['cart'][] = [
+                'cart_item' => [
+                    'sku' => [
+                        'sku_id' => $sku,
+                    ],
+                    'quantity' => is_array($quantity) ? $quantity[$key] : $quantity,
+                ]
+            ];
+        }
+        $bodyArray['expected-total-price'] = [
+            'currency' => $pricingSettings->getCurrency(),
+            'amount' => $priceAmount,
+        ];
+            
+        $body = Xml::prepareBody('order', $bodyArray);
         $response = Request::post(
             $this->module->sandbox ? "https://sandbox.bluesnap.com/services/2/orders" : "https://ws.bluesnap.com/services/2/orders",
             $body,
