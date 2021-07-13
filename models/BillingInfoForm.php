@@ -3,6 +3,7 @@
 namespace achertovsky\bluesnap\models;
 
 use yii\base\Model;
+use yii\helpers\ArrayHelper;
 
 class BillingInfoForm extends Model
 {
@@ -38,7 +39,9 @@ class BillingInfoForm extends Model
      * @var string
      */
     public $city;
-
+    /**
+     * @inheritDoc
+     */
     public function rules()
     {
         return [
@@ -46,6 +49,20 @@ class BillingInfoForm extends Model
             [['firstname', 'lastname', 'street', 'state', 'city', 'country'], 'string'],
             ['zip', 'integer'],
         ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function attributeLabels()
+    {
+        return ArrayHelper::merge(
+            parent::attributeLabels(),
+            [
+                'address1' => 'Address',
+                'address2' => 'Second Address',
+            ]
+        );
     }
 
     /**
