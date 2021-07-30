@@ -107,7 +107,7 @@ class ChargePolicy extends Model
     public function getActiveType()
     {
         foreach ($this->getData() as $key => $value) {
-            if (empty($value)) {
+            if (empty($value['catalog_prices'])) {
                 continue;
             }
             return $value;

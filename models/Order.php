@@ -184,7 +184,14 @@ class Order extends Core
                 continue;
             }
             $pricingSettings = $skuModels[$sku]->pricingSettings;
-            $priceAmount += $pricingSettings->getPrice();
+            if (isset($pricingSettings->charge_policy['free_trial'])) {
+                /**
+                 * if trial - no amount required
+                 */
+                $priceAmount = 0;
+            } else {
+                $priceAmount += $pricingSettings->getPrice();
+            }
             $bodyArray['cart'][] = [
                 'cart_item' => [
                     'sku' => [
