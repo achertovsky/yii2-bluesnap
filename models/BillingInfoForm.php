@@ -16,7 +16,7 @@ class BillingInfoForm extends Model
      */
     public $lastname;
     /**
-     * @var integer
+     * @var string
      */
     public $zip;
     /**
@@ -46,8 +46,7 @@ class BillingInfoForm extends Model
     {
         return [
             [['firstname', 'lastname', 'zip', 'country', 'state', 'address1', 'address2', 'city'], 'required'],
-            [['firstname', 'lastname', 'street', 'state', 'city', 'country'], 'string'],
-            ['zip', 'integer'],
+            [['firstname', 'lastname', 'street', 'state', 'city', 'country', 'zip'], 'string'],
         ];
     }
 
