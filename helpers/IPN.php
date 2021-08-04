@@ -183,9 +183,10 @@ class IPN extends \yii\base\Object
         }
         
         //upsales
-        if (isset($this->post['promoteContractsNum']) && $this->post['promoteContractsNum'] > 0) {
+        if ($this->status == Order::STATUS_COMPLETED && isset($this->post['promoteContractsNum']) && $this->post['promoteContractsNum'] > 0) {
             Yii::debug($this->post['promoteContractsNum']." promote contracts was found");
             for ($i = 0; $i < $this->post['promoteContractsNum']; $i++) {
+                $subscriptionId = !empty($this->post["promoteSubscriptionId$i"]) ? $this->post["promoteSubscriptionId$i"] : null;
                 $order = self::getOrderModel(
                     $this->post['accountId'],
                     $this->post["promoteProductId$i"],
@@ -194,7 +195,8 @@ class IPN extends \yii\base\Object
                     $this->post["promoteContractQuantity$i"],
                     $this->post["promoteContractPrice$i"],
                     $this->status,
-                    $this->post
+                    $this->post,
+                    $subscriptionId
                 );
                 if (!$order->save()) {
                     Yii::error("Validation errors is: ".var_export($order->errors, true));
@@ -216,7 +218,7 @@ class IPN extends \yii\base\Object
      * @param array $postData
      * @return \achertovsky\bluesnap\models\Order
      */
-    protected static function getOrderModel($shopperId, $productId, $skuId, $referenceNumber, $quantity, $usdAmount, $status, $postData)
+    protected static function getOrderModel($shopperId, $productId, $skuId, $referenceNumber, $quantity, $usdAmount, $status, $postData, $subscriptionId = null)
     {
         $order = Yii::$app->bluesnap->getOrderModel(
             [
@@ -243,6 +245,9 @@ class IPN extends \yii\base\Object
                 'status' => $status,
             ]
         );
+        if (!is_null($subscriptionId)) {
+            $order->subscription_id = $subscriptionId;
+        }
         return $order;
     }
 }
