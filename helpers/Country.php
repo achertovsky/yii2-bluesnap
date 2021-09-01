@@ -286,6 +286,7 @@ class Country
         "Vietnam" => "vn",
         "Virgin Islands (British)" => "vg",
         "Virgin Islands (USA)" => "vi",
+        "U.S. Virgin Islands" => "vi",
         "Wallis and Futuna Islands" => "wf",
         "Western Sahara" => "eh",
         "Zambia" => "zm",

@@ -163,7 +163,6 @@ class IPN extends \yii\base\Object
             Yii::debug("Main product is subscription");
             $order->subscription_id = $this->post['subscriptionId'];
         }
-        $result = false;
         if ($order->validate()) {
             // update all previous subscriptions to cancelled status before save new one
             if (!empty($this->post['subscriptionId'])) {
