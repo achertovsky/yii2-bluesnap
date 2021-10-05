@@ -2,7 +2,7 @@
 
 namespace achertovsky\bluesnap\models;
 
-use achertovsky\bluesnap\helpers\Xml;
+use yii\helpers\Json;
 use achertovsky\bluesnap\traits\Common;
 use achertovsky\bluesnap\helpers\Request;
 
@@ -31,10 +31,9 @@ class Report extends \yii\base\Object
             $this->url.$reportCode,
             $parameters,
             [
-                'Content-Type' => 'application/xml',
                 'Authorization' => $this->module->authToken,
             ]
         )->getContent();
-        return Xml::parse($content);
+        return Json::decode($content);
     }
 }
