@@ -21,8 +21,11 @@ class Report extends \yii\base\Object
     protected $liveUrl = 'https://ws.bluesnap.com/services/2/report/';
 
     /**
-     * Returns response for subscription
-     * @param int $subscriptionId
+     * Returns reports
+     * https://developers.bluesnap.com/v8976-Tools/docs/get-report-data
+     *
+     * @param string $reportCode
+     * @param mixed $parameters
      * @return array
      */
     public function getReport($reportCode, $parameters)
