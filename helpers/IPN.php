@@ -102,7 +102,7 @@ class IPN extends \yii\base\Object
      */
     public function handleIpn()
     {
-        if (!in_array(Yii::$app->request->getUserIP(), $this->ips)) {
+        if (!in_array(Yii::$app->request->getUserIP(), $this->ips) && !$this->module->sandbox) {
             Yii::info("Wrong ip");
             throw new \yii\web\NotFoundHttpException;
         }
@@ -121,6 +121,7 @@ class IPN extends \yii\base\Object
                 case "CANCELLATION":
                 case "DECLINE":
                 case "CANCELLATION_REFUND":
+                case "CANCEL_ON_RENEWAL":
                     $this->status = Order::STATUS_CANCELLED;
                     break;
             }
@@ -140,7 +141,7 @@ class IPN extends \yii\base\Object
     protected $status = null;
     
     /**
-     * @return bool
+     * @return void
      */
     public function handle()
     {
@@ -148,37 +149,24 @@ class IPN extends \yii\base\Object
         if (!isset($this->post['invoiceAmountUSD'])) {
             return false;
         }
-        $order = Yii::$app->bluesnap->getOrderModel(
-            [
-                'reference_number' => $this->post['referenceNumber'],
-            ],
-            'id',
-            true
-        );
-        if (empty($order)) {
-            $order = Yii::$app->bluesnap->orderModel;
-        }
-        $order->ipnPost = $this->post;
-        $order->setAttributes(
-            [
-                'shopper_id' => $this->post['accountId'],
-                'product_id' => $this->post['productId'],
-                'sku_id' => $this->post['contractId'],
-                'quantity' => $this->post['quantity'],
-                'usd_amount' => $this->post['invoiceAmountUSD'],
-                'reference_number' => $this->post['referenceNumber'],
-            ]
+        $order = self::getOrderModel(
+            $this->post['accountId'],
+            $this->post['productId'],
+            $this->post['contractId'],
+            $this->post['referenceNumber'],
+            $this->post['quantity'],
+            $this->post['invoiceAmountUSD'],
+            $this->status,
+            $this->post
         );
         if (isset($this->post['subscriptionId'])) {
+            Yii::debug("Main product is subscription");
             $order->subscription_id = $this->post['subscriptionId'];
-        }
-        $order->status = $this->status;
-        if (!$order->validate()) {
-            Yii::debug("Validation errors is: ".var_export($order->errors, true));
         }
         if ($order->validate()) {
             // update all previous subscriptions to cancelled status before save new one
             if (!empty($this->post['subscriptionId'])) {
+                Yii::debug("Item is subscription, cancel previous subscription orders");
                 Order::updateAll(
                     [
                         'status' => Order::STATUS_CANCELLED,
@@ -188,7 +176,77 @@ class IPN extends \yii\base\Object
                     ]
                 );
             }
-            return $order->save();
+            $order->save();
+        } else {
+            Yii::error("Validation errors is: ".var_export($order->errors, true));
         }
+        
+        //upsales
+        if ($this->status == Order::STATUS_COMPLETED && isset($this->post['promoteContractsNum']) && $this->post['promoteContractsNum'] > 0) {
+            Yii::debug($this->post['promoteContractsNum']." promote contracts was found");
+            for ($i = 0; $i < $this->post['promoteContractsNum']; $i++) {
+                $subscriptionId = !empty($this->post["promoteSubscriptionId$i"]) ? $this->post["promoteSubscriptionId$i"] : null;
+                $order = self::getOrderModel(
+                    $this->post['accountId'],
+                    $this->post["promoteProductId$i"],
+                    $this->post["promoteContractId$i"],
+                    $this->post['referenceNumber'],
+                    $this->post["promoteContractQuantity$i"],
+                    $this->post["promoteContractPrice$i"],
+                    $this->status,
+                    $this->post,
+                    $subscriptionId
+                );
+                if (!$order->save()) {
+                    Yii::error("Validation errors is: ".var_export($order->errors, true));
+                }
+            }
+        }
+    }
+
+    /**
+     * Code sugar
+     *
+     * @param integer $shopperId
+     * @param integer $productId
+     * @param integer $skuId
+     * @param integer $referenceNumber
+     * @param integer $quantity
+     * @param double $usdAmount
+     * @param integer $status
+     * @param array $postData
+     * @return \achertovsky\bluesnap\models\Order
+     */
+    protected static function getOrderModel($shopperId, $productId, $skuId, $referenceNumber, $quantity, $usdAmount, $status, $postData, $subscriptionId = null)
+    {
+        $order = Yii::$app->bluesnap->getOrderModel(
+            [
+                'shopper_id' => $shopperId,
+                'product_id' => $productId,
+                'sku_id' => $skuId,
+                'reference_number' => $referenceNumber,
+            ],
+            'id',
+            true
+        );
+        if (empty($order)) {
+            $order = Yii::$app->bluesnap->orderModel;
+        }
+        $order->ipnPost = $postData;
+        $order->setAttributes(
+            [
+                'shopper_id' => $shopperId,
+                'product_id' => $productId,
+                'sku_id' => $skuId,
+                'reference_number' => $referenceNumber,
+                'quantity' => $quantity,
+                'usd_amount' => $usdAmount,
+                'status' => $status,
+            ]
+        );
+        if (!is_null($subscriptionId)) {
+            $order->subscription_id = $subscriptionId;
+        }
+        return $order;
     }
 }

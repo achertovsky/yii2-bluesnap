@@ -245,7 +245,7 @@ class Sku extends Core
     }
     
     /**
-     * Updates SKU
+     * Creates SKU
      * Docs: https://developers.bluesnap.com/v8976-Extended/docs/create-sku
      * @param string $type
      * @return boolean|\achertovsky\bluesnap\models\Sku
@@ -281,6 +281,8 @@ class Sku extends Core
                 $location = $headers['location'];
                 $this->sku_id = substr($location, strrpos($location, '/')+1);
             }
+            $this->isNewRecord = true;
+            $this->id = null;
             if ($this->save()) {
                 return $this;
             } 
