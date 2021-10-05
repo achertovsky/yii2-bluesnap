@@ -277,6 +277,6 @@ class Bluesnap extends \yii\base\BaseObject
         }
         $report->module = Yii::$app->getModule($this->moduleName);
         $report->setUrl();
-        return $report
+        return $report;
     }
 }
