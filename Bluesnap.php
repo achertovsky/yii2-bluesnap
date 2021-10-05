@@ -13,6 +13,7 @@ use achertovsky\bluesnap\helpers\IPN;
 use achertovsky\bluesnap\models\Order;
 use achertovsky\bluesnap\models\Subscription;
 use achertovsky\bluesnap\helpers\HostedPaymentFields;
+use achertovsky\bluesnap\models\Report;
 
 /**
  * Component contains all required actions
@@ -262,5 +263,20 @@ class Bluesnap extends \yii\base\BaseObject
         );
         $helper->setUrl();
         return $helper;
+    }
+
+    /**
+     * @return Report
+     */
+    public function getReportModel()
+    {
+        if (isset($this->modelMap['report'])) {
+            $report = new $this->modelMap['report'];
+        } else {
+            $report = new Report();
+        }
+        $report->module = Yii::$app->getModule($this->moduleName);
+        $report->setUrl();
+        return $report
     }
 }
