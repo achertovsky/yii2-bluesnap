@@ -208,6 +208,7 @@ class Shopper extends Core
         $this->shopper_id = $shopperId;
         $content = Request::get(
             $this->url.'/'.(!is_null($sellerShopperId) ? $sellerShopperId.','.$this->module->sellerId : $shopperId),
+            null,
             [
                 'Content-Type' => 'application/xml',
                 'Authorization' => $this->module->authToken,

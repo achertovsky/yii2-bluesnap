@@ -191,6 +191,7 @@ class Product extends Core
         $this->product_id = $productId;
         $content = Request::get(
             $this->url.'/'.$productId,
+            null,
             [
                 'Content-Type' => 'application/xml',
                 'Authorization' => $this->module->authToken,

@@ -25,13 +25,13 @@ trait Common
             }
             $result[$name] = $var;
         }
-        return $result; 
-   }
+        return $result;
+    }
    
    /**
-    * @var string 
+    * @var string
     */
-   protected $url;
+    protected $url;
    
     /**
      * Sets url that gonna be used to requests

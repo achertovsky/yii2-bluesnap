@@ -30,6 +30,7 @@ class Subscription extends \yii\base\Object
     {
         $content = Request::get(
             $this->url.$subscriptionId,
+            null,
             [
                 'Content-Type' => 'application/xml',
                 'Authorization' => $this->module->authToken,

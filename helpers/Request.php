@@ -36,12 +36,13 @@ class Request
     
     /**
      * @param string $url
+     * @param mixed $data
      * @param array $headers
      * @return yii\httpclient\Request
      */
-    public static function get($url, $headers = [])
+    public static function get($url, $data = null, $headers = [])
     {
         $client = new Client;
-        return $client->get($url, null, $headers)->send();
+        return $client->get($url, $data, $headers)->send();
     }
 }

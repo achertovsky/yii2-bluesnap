@@ -107,6 +107,7 @@ class Sku extends Core
     {
         $content = Request::get(
             $this->url.'/'.$this->sku_id,
+            null,
             [
                 'Content-Type' => 'application/xml',
                 'Authorization' => $this->module->authToken,
