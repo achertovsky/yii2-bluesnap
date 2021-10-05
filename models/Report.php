@@ -28,7 +28,7 @@ class Report extends \yii\base\Object
      * @param mixed $parameters
      * @return array
      */
-    public function getReport($reportCode, $parameters)
+    public function getReport($reportCode, $parameters = null)
     {
         $content = Request::get(
             $this->url.$reportCode,
