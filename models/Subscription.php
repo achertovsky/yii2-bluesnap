@@ -6,6 +6,7 @@ use achertovsky\bluesnap\helpers\Xml;
 use achertovsky\bluesnap\helpers\Request;
 use achertovsky\bluesnap\traits\Common;
 use Yii;
+use yii\helpers\Url;
 
 /**
  * @author Alexander Chertovsky
@@ -23,13 +24,20 @@ class Subscription extends \yii\base\Object
     
     /**
      * Returns response for subscription
+     * https://developers.bluesnap.com/v8976-JSON/docs/retrieve-all-subscriptions
+     *
      * @param int $subscriptionId
      * @return array
      */
-    public function getSubscription($subscriptionId)
+    public function getSubscription($subscriptionId, $parameters = [])
     {
+        foreach ($parameters as $name => &$param) {
+            $param = "$name=".(string)$param;
+        }
+        $gets = implode('&', $parameters);
+        $route = $this->url.$subscriptionId.(empty($gets) ? '' : '?'.$gets);
         $content = Request::get(
-            $this->url.$subscriptionId,
+            $route,
             null,
             [
                 'Content-Type' => 'application/xml',
