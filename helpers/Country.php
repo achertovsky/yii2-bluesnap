@@ -127,6 +127,7 @@ class Country
         "Greenland" => "gl",
         "Grenada" => "gd",
         "Guadeloupe (French)" => "gp",
+        "Guadeloupe" => "gp",
         "Guam (USA)" => "gu",
         "Guam" => "gu",
         "Guatemala" => "gt",
