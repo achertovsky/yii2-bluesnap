@@ -84,6 +84,7 @@ class Country
         "China" => "cn",
         "Christmas Island" => "cx",
         "Cocos (Keeling) Islands" => "cc",
+        "Colombia" => "co",
         "Comoros" => "km",
         "Congo" => "cg",
         "Congo (Brazzaville)" => "cd",
